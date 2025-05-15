@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { db } from "./config";
 import { Player, TeamComposition } from "@/app/types";
+import { getInitialMmr, calculateTeamAverageMmr } from "./mmrService";
 
 // Reference to players collection
 const playersCollection = collection(db, "players");
@@ -24,7 +25,9 @@ const teamCompositionsCollection = collection(db, "teamCompositions");
 // Add a new player to Firestore
 export const addPlayerToFirestore = async (player: Player): Promise<string> => {
   try {
-    // Initialize stats for new players
+    // Initialize stats for new players with default MMR based on category
+    const initialMmr = getInitialMmr(player.category);
+
     const playerWithStats = {
       ...player,
       stats: {
@@ -32,6 +35,7 @@ export const addPlayerToFirestore = async (player: Player): Promise<string> => {
         losses: 0,
         matchesPlayed: 0,
         winRate: 0,
+        mmr: initialMmr,
       },
     };
 
@@ -101,6 +105,15 @@ export const updatePlayerInFirestore = async (
 ): Promise<void> => {
   try {
     const playerRef = doc(db, "players", playerId);
+
+    // If category changed, update MMR based on the new category
+    if (updatedPlayer.category && updatedPlayer.stats) {
+      // Only update if MMR hasn't been set by matches already
+      if (updatedPlayer.stats.matchesPlayed === 0) {
+        updatedPlayer.stats.mmr = getInitialMmr(updatedPlayer.category);
+      }
+    }
+
     await updateDoc(playerRef, updatedPlayer);
   } catch (error) {
     console.error("Error updating player in Firestore:", error);
@@ -126,10 +139,16 @@ export const saveTeamComposition = async (
     const cleanTeam1 = team1.map(({ isSelected, ...player }) => player);
     const cleanTeam2 = team2.map(({ isSelected, ...player }) => player);
 
+    // Calculate average MMR for each team
+    const team1AvgMmr = calculateTeamAverageMmr(cleanTeam1);
+    const team2AvgMmr = calculateTeamAverageMmr(cleanTeam2);
+
     const teamComp: TeamComposition = {
       date: new Date().toISOString(),
       team1: cleanTeam1,
       team2: cleanTeam2,
+      team1AvgMmr,
+      team2AvgMmr,
     };
 
     const docRef = await addDoc(teamCompositionsCollection, teamComp);

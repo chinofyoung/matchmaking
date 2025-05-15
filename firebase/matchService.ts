@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { db } from "./config";
 import { MatchResult, PlayerStats, Player, TeamComposition } from "@/app/types";
+import { calculateMatchMmrChanges } from "./mmrService";
 
 // Reference to collections
 const matchResultsCollection = collection(db, "matchResults");
@@ -53,41 +54,49 @@ export const recordMatchResult = async (
 
     const teamComposition = teamCompSnap.data() as TeamComposition;
 
+    // Calculate MMR changes for all players
+    const { updatedTeam1, updatedTeam2, team1MmrChange, team2MmrChange } =
+      calculateMatchMmrChanges(
+        teamComposition.team1,
+        teamComposition.team2,
+        winningTeam
+      );
+
+    // Update matchResult with MMR changes
+    matchResult.mmrChanges = {
+      team1: team1MmrChange,
+      team2: team2MmrChange,
+    };
+
     // For transactional consistency, use a transaction to update all player stats
     await runTransaction(db, async (transaction) => {
-      // Get all participating players
-      const team1 = teamComposition.team1;
-      const team2 = teamComposition.team2;
-
-      // Get the winning and losing team players
-      const winningTeamPlayers = winningTeam === "team1" ? team1 : team2;
-      const losingTeamPlayers = winningTeam === "team1" ? team2 : team1;
-
       // Collect all player references and snapshots first (all reads)
       const playerRefsAndSnaps = [];
 
-      // Add reads for winning team players
-      for (const player of winningTeamPlayers) {
-        if (player.id) {
-          const playerRef = doc(playersCollection, player.id);
+      // Add reads for team1 players
+      for (const updatedPlayer of updatedTeam1) {
+        if (updatedPlayer.id) {
+          const playerRef = doc(playersCollection, updatedPlayer.id);
           const playerSnap = await transaction.get(playerRef);
           playerRefsAndSnaps.push({
             ref: playerRef,
             snap: playerSnap,
-            isWinner: true,
+            updatedPlayer,
+            isWinner: winningTeam === "team1",
           });
         }
       }
 
-      // Add reads for losing team players
-      for (const player of losingTeamPlayers) {
-        if (player.id) {
-          const playerRef = doc(playersCollection, player.id);
+      // Add reads for team2 players
+      for (const updatedPlayer of updatedTeam2) {
+        if (updatedPlayer.id) {
+          const playerRef = doc(playersCollection, updatedPlayer.id);
           const playerSnap = await transaction.get(playerRef);
           playerRefsAndSnaps.push({
             ref: playerRef,
             snap: playerSnap,
-            isWinner: false,
+            updatedPlayer,
+            isWinner: winningTeam === "team2",
           });
         }
       }
@@ -96,13 +105,14 @@ export const recordMatchResult = async (
       const teamCompTransactionSnap = await transaction.get(teamCompRef);
 
       // Now perform all writes after completing all reads
-      for (const { ref, snap, isWinner } of playerRefsAndSnaps) {
+      for (const { ref, snap, updatedPlayer, isWinner } of playerRefsAndSnaps) {
         if (snap.exists()) {
           const currentPlayer = snap.data() as Player;
           const currentStats = currentPlayer.stats || {
             wins: 0,
             losses: 0,
             matchesPlayed: 0,
+            mmr: updatedPlayer.stats?.mmr || 1000,
           };
 
           const updatedStats: PlayerStats = {
@@ -113,16 +123,26 @@ export const recordMatchResult = async (
               isWinner ? currentStats.wins + 1 : currentStats.wins,
               currentStats.matchesPlayed + 1
             ),
+            mmr: updatedPlayer.stats?.mmr || currentStats.mmr,
+            mmrChange: updatedPlayer.stats?.mmrChange || 0,
           };
 
           transaction.update(ref, { stats: updatedStats });
         }
       }
 
-      // Update team composition with match result
+      // Update team composition with match result and MMR changes
       if (teamCompTransactionSnap.exists()) {
         transaction.update(teamCompRef, {
-          matchResult: { winningTeam, scoreSummary, notes },
+          matchResult: {
+            winningTeam,
+            scoreSummary,
+            notes,
+            mmrChanges: {
+              team1: team1MmrChange,
+              team2: team2MmrChange,
+            },
+          },
         });
       }
     });

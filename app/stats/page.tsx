@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { getPlayersFromFirestore } from "@/firebase/playerService";
 import { getTopPlayersByWinRate } from "@/firebase/matchService";
 import { Player, Role } from "@/app/types";
+import { getMmrTierName, getMmrTierColor } from "@/firebase/mmrService";
 
 export default function StatsPage() {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -66,6 +67,8 @@ export default function StatsPage() {
         return (b.stats?.wins || 0) - (a.stats?.wins || 0);
       } else if (sortField === "matchesPlayed") {
         return (b.stats?.matchesPlayed || 0) - (a.stats?.matchesPlayed || 0);
+      } else if (sortField === "mmr") {
+        return (b.stats?.mmr || 0) - (a.stats?.mmr || 0);
       } else {
         return (b.stats?.winRate || 0) - (a.stats?.winRate || 0);
       }
@@ -197,6 +200,7 @@ export default function StatsPage() {
                       <option value="winRate">Win Rate</option>
                       <option value="matchesPlayed">Matches Played</option>
                       <option value="wins">Total Wins</option>
+                      <option value="mmr">MMR Rating</option>
                     </select>
                   </div>
 
@@ -217,6 +221,15 @@ export default function StatsPage() {
                         ).toFixed(1)}
                         %
                       </p>
+                      <p>
+                        Avg. MMR:{" "}
+                        {Math.round(
+                          filteredPlayers.reduce(
+                            (acc, player) => acc + (player.stats?.mmr || 0),
+                            0
+                          ) / (filteredPlayers.length || 1)
+                        )}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -236,6 +249,9 @@ export default function StatsPage() {
                         </th>
                         <th className="py-3 px-4 text-left font-medium">
                           Roles
+                        </th>
+                        <th className="py-3 px-4 text-center font-medium">
+                          MMR Rating
                         </th>
                         <th className="py-3 px-4 text-center font-medium">
                           Win Rate
@@ -318,6 +334,22 @@ export default function StatsPage() {
                             </div>
                           </td>
                           <td className="py-3 px-4 text-center">
+                            {player.stats?.mmr ? (
+                              <div>
+                                <span
+                                  className={getMmrTierColor(player.stats.mmr)}
+                                >
+                                  {player.stats.mmr}
+                                </span>
+                                <div className="text-xs">
+                                  {getMmrTierName(player.stats.mmr)}
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="text-gray-500">N/A</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-center">
                             <span
                               className={`font-medium ${
                                 (player.stats?.winRate || 0) >= 60
@@ -334,7 +366,7 @@ export default function StatsPage() {
                             <span className="text-green-600 dark:text-green-400">
                               {player.stats?.wins || 0}
                             </span>
-                            <span className="text-gray-500 dark:text-gray-400">
+                            <span className="text-gray-500 dark:text-gray-400 mx-1">
                               /
                             </span>
                             <span className="text-red-600 dark:text-red-400">

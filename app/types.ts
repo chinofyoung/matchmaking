@@ -10,6 +10,7 @@ export interface Player {
   roles: Role[];
   isSelected?: boolean;
   stats?: PlayerStats;
+  mmr?: number; // ELO rating
 }
 
 // Player statistics tracking
@@ -18,6 +19,8 @@ export interface PlayerStats {
   losses: number;
   matchesPlayed: number;
   winRate?: number; // Calculated field (wins / matchesPlayed)
+  mmr: number; // ELO rating (MMR)
+  mmrChange?: number; // Last MMR change amount (for displaying +/- after matches)
 }
 
 // Define team composition type
@@ -27,6 +30,8 @@ export interface TeamComposition {
   team1: Player[];
   team2: Player[];
   matchResult?: MatchResult;
+  team1AvgMmr?: number; // Average team MMR
+  team2AvgMmr?: number; // Average team MMR
 }
 
 // Match result type
@@ -37,4 +42,8 @@ export interface MatchResult {
   winningTeam: "team1" | "team2";
   scoreSummary?: string; // Optional field to store the score or summary
   notes?: string; // Optional field for match notes
+  mmrChanges?: {
+    team1: number;
+    team2: number;
+  }; // Optional field to store MMR changes
 }
