@@ -8,13 +8,17 @@ import {
   updatePlayerInFirestore,
 } from "@/firebase/playerService";
 import { Player, Role } from "@/app/types";
+import {
+  DEFAULT_MMR_VALUES,
+  MmrTier,
+  getMmrTierName,
+  getMmrTierColor,
+} from "@/firebase/mmrService";
 
 export default function PlayersPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [newPlayerName, setNewPlayerName] = useState("");
-  const [newPlayerCategory, setNewPlayerCategory] = useState<
-    "Expert" | "Intermediate" | "Beginner"
-  >("Expert");
+  const [newPlayerMmrTier, setNewPlayerMmrTier] = useState<MmrTier>("SemiBubu");
   const [selectedRoles, setSelectedRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +27,18 @@ export default function PlayersPage() {
 
   // Available roles
   const availableRoles: Role[] = ["Roam", "Mid", "Gold", "Jungle", "Exp"];
+
+  // Available MMR tiers
+  const availableTiers: MmrTier[] = [
+    "Bubu",
+    "SemiBubu",
+    "MaaramGuti",
+    "Maaram",
+    "DiriMakarit",
+    "Makarit",
+    "MakaritKaritan",
+    "PinakaMakarit",
+  ];
 
   // Load players from Firestore on component mount
   useEffect(() => {
@@ -44,14 +60,14 @@ export default function PlayersPage() {
     loadData();
   }, []);
 
-  // Add a new player with name, category and roles, and save to Firestore
+  // Add a new player with name, MMR tier and roles, and save to Firestore
   const addPlayer = async () => {
     if (newPlayerName.trim() && selectedRoles.length > 0) {
       try {
         // Create new player object
         const newPlayer: Player = {
           name: newPlayerName.trim(),
-          category: newPlayerCategory,
+          mmr: DEFAULT_MMR_VALUES[newPlayerMmrTier],
           roles: [...selectedRoles],
         };
 
@@ -107,7 +123,8 @@ export default function PlayersPage() {
   const startEditingPlayer = (player: Player) => {
     setEditingPlayer(player);
     setNewPlayerName(player.name);
-    setNewPlayerCategory(player.category);
+    // Set MMR tier based on player's MMR
+    setNewPlayerMmrTier(getMmrTierName(player.mmr) as MmrTier);
     setSelectedRoles(player.roles);
     setIsEditing(true);
   };
@@ -116,7 +133,7 @@ export default function PlayersPage() {
   const cancelEditing = () => {
     setEditingPlayer(null);
     setNewPlayerName("");
-    setNewPlayerCategory("Expert");
+    setNewPlayerMmrTier("SemiBubu");
     setSelectedRoles([]);
     setIsEditing(false);
   };
@@ -136,7 +153,7 @@ export default function PlayersPage() {
 
       const updatedPlayer: Partial<Player> = {
         name: newPlayerName.trim(),
-        category: newPlayerCategory,
+        mmr: DEFAULT_MMR_VALUES[newPlayerMmrTier],
         roles: [...selectedRoles],
       };
 
@@ -154,7 +171,7 @@ export default function PlayersPage() {
 
       // Reset form
       setNewPlayerName("");
-      setNewPlayerCategory("Expert");
+      setNewPlayerMmrTier("SemiBubu");
       setSelectedRoles([]);
       setEditingPlayer(null);
       setIsEditing(false);
@@ -180,17 +197,17 @@ export default function PlayersPage() {
   const getRoleColor = (role: Role): string => {
     switch (role) {
       case "Roam":
-        return "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200";
+        return "bg-purple-100 dark:bg-purple-900/40 text-purple-900 dark:text-purple-100";
       case "Mid":
-        return "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200";
+        return "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-900 dark:text-yellow-100";
       case "Gold":
-        return "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200";
+        return "bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-100";
       case "Jungle":
-        return "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200";
+        return "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-900 dark:text-emerald-100";
       case "Exp":
-        return "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-200";
+        return "bg-cyan-100 dark:bg-cyan-900/40 text-cyan-900 dark:text-cyan-100";
       default:
-        return "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200";
+        return "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100";
     }
   };
 
@@ -200,8 +217,8 @@ export default function PlayersPage() {
         <h1 className="text-3xl font-bold text-center mb-4 text-blue-700 dark:text-blue-400">
           Player Management
         </h1>
-        <p className="text-center text-gray-600 dark:text-gray-400">
-          Add, edit, and remove players with their skill level and preferred
+        <p className="text-center text-gray-700 dark:text-gray-300">
+          Add, edit, and remove players with their MMR rating and preferred
           roles.
         </p>
       </section>
@@ -234,24 +251,22 @@ export default function PlayersPage() {
 
           <div>
             <label
-              htmlFor="player-category"
+              htmlFor="player-mmr-tier"
               className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >
-              Skill Level
+              MMR Tier
             </label>
             <select
-              id="player-category"
-              value={newPlayerCategory}
-              onChange={(e) =>
-                setNewPlayerCategory(
-                  e.target.value as "Expert" | "Intermediate" | "Beginner"
-                )
-              }
+              id="player-mmr-tier"
+              value={newPlayerMmrTier}
+              onChange={(e) => setNewPlayerMmrTier(e.target.value as MmrTier)}
               className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
             >
-              <option value="Expert">Expert</option>
-              <option value="Intermediate">Intermediate</option>
-              <option value="Beginner">Beginner</option>
+              {availableTiers.map((tier) => (
+                <option key={tier} value={tier}>
+                  {tier} ({DEFAULT_MMR_VALUES[tier]} MMR)
+                </option>
+              ))}
             </select>
           </div>
 
@@ -345,7 +360,7 @@ export default function PlayersPage() {
               <thead>
                 <tr className="border-b dark:border-gray-700">
                   <th className="text-left py-2 px-4">Name</th>
-                  <th className="text-left py-2 px-4">Skill</th>
+                  <th className="text-left py-2 px-4">MMR</th>
                   <th className="text-left py-2 px-4">Roles</th>
                   <th className="text-left py-2 px-4">Stats</th>
                   <th className="text-right py-2 px-4">Action</th>
@@ -359,17 +374,18 @@ export default function PlayersPage() {
                   >
                     <td className="py-2 px-4">{player.name}</td>
                     <td className="py-2 px-4">
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          player.category === "Expert"
-                            ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200"
-                            : player.category === "Intermediate"
-                            ? "bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200"
-                            : "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200"
-                        }`}
-                      >
-                        {player.category}
-                      </span>
+                      <div>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${getMmrTierColor(
+                            player.mmr
+                          )}`}
+                        >
+                          {player.mmr}
+                        </span>
+                        <span className="text-xs ml-1 text-gray-500">
+                          {getMmrTierName(player.mmr)}
+                        </span>
+                      </div>
                     </td>
                     <td className="py-2 px-4">
                       <div className="flex flex-wrap gap-1">
@@ -410,17 +426,43 @@ export default function PlayersPage() {
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => startEditingPlayer(player)}
-                          className="text-blue-500 hover:text-blue-700"
+                          className="text-blue-500 hover:text-blue-700 transition-colors"
                           title="Edit player"
                         >
-                          ✎
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                            />
+                          </svg>
                         </button>
                         <button
                           onClick={() => removePlayer(index)}
-                          className="text-red-500 hover:text-red-700"
+                          className="text-red-500 hover:text-red-700 transition-colors"
                           title="Remove player"
                         >
-                          ✕
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
                         </button>
                       </div>
                     </td>

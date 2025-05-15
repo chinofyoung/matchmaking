@@ -48,9 +48,9 @@ export default function HomePage() {
     <div>
       <section className="mb-10">
         <h1 className="text-3xl md:text-4xl font-bold text-center mb-4 text-blue-700 dark:text-blue-400">
-          ML Team Manager
+          GAP Makarits
         </h1>
-        <p className="text-center text-gray-600 dark:text-gray-400 mb-8">
+        <p className="text-center text-gray-700 dark:text-gray-300 mb-8">
           Manage your players, create balanced teams, and track match statistics
         </p>
       </section>
@@ -81,7 +81,7 @@ export default function HomePage() {
               <h2 className="text-xl font-semibold mb-4 text-purple-600 dark:text-purple-400">
                 Teams
               </h2>
-              <div className="text-sm text-center text-gray-600 dark:text-gray-400 mb-2">
+              <div className="text-sm text-center text-gray-700 dark:text-gray-300 mb-2">
                 Create balanced teams based on skill level and roles
               </div>
               <div className="mt-auto">
@@ -117,7 +117,7 @@ export default function HomePage() {
               </h2>
 
               {recentMatches.length === 0 ? (
-                <p className="text-center text-gray-500 dark:text-gray-400 my-8">
+                <p className="text-center text-gray-700 dark:text-gray-300 my-8">
                   No matches recorded yet. Start by creating teams and recording
                   match results.
                 </p>
@@ -145,8 +145,8 @@ export default function HomePage() {
                             <span
                               className={`text-xs px-2 py-1 rounded-full ${
                                 match.winningTeam === "team1"
-                                  ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200"
-                                  : "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200"
+                                  ? "bg-red-100 dark:bg-red-900/40 text-red-900 dark:text-red-100"
+                                  : "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-900 dark:text-indigo-100"
                               }`}
                             >
                               Team {match.winningTeam === "team1" ? "1" : "2"}
@@ -186,7 +186,7 @@ export default function HomePage() {
               </h2>
 
               {topPlayers.length === 0 ? (
-                <p className="text-center text-gray-500 dark:text-gray-400 my-8">
+                <p className="text-center text-gray-700 dark:text-gray-300 my-8">
                   No player rankings yet. Record some match results to see
                   rankings.
                 </p>

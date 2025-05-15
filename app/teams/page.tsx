@@ -7,6 +7,12 @@ import {
   updatePlayerInFirestore,
   saveTeamComposition,
 } from "@/firebase/playerService";
+import {
+  calculateTeamAverageMmr,
+  getInitialMmr,
+  getMmrTierName,
+  getMmrTierColor,
+} from "@/firebase/mmrService";
 import { Player, Role, TeamComposition } from "@/app/types";
 
 export default function TeamsPage() {
@@ -18,6 +24,7 @@ export default function TeamsPage() {
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedCount, setSelectedCount] = useState(0);
   const [isSavingTeam, setIsSavingTeam] = useState(false);
 
@@ -84,21 +91,54 @@ export default function TeamsPage() {
     }
   };
 
-  // Save current team composition to Firestore and redirect to match recording
+  // Save current team composition to Firestore
   const saveCurrentTeams = async () => {
     if (!teams) return;
 
     try {
       setIsSavingTeam(true);
+      setError(null);
+      setSuccessMessage(null);
 
       // Save teams to Firestore
       const teamId = await saveTeamComposition(teams.team1, teams.team2);
 
-      // Redirect to match recording page with the team ID
-      router.push(`/matches/record?teamId=${teamId}`);
+      // Update state and show success
+      setSuccessMessage("Teams saved successfully!");
+      setIsSavingTeam(false);
+      return teamId;
     } catch (error) {
       console.error("Error saving team composition:", error);
       setError("Failed to save team composition. Please try again.");
+      setSuccessMessage(null);
+      setIsSavingTeam(false);
+      return null;
+    }
+  };
+
+  // Navigate to match recording with the selected team
+  const goToMatchRecording = async () => {
+    if (!teams) return;
+
+    try {
+      setIsSavingTeam(true);
+      setError(null);
+      setSuccessMessage(null);
+
+      // First save the teams
+      const teamId = await saveTeamComposition(teams.team1, teams.team2);
+
+      if (teamId) {
+        // Then redirect to match recording
+        router.push(`/matches/record?teamId=${teamId}`);
+      } else {
+        setError("Failed to save team composition. Please try again.");
+        setIsSavingTeam(false);
+      }
+    } catch (error) {
+      console.error("Error navigating to match recording:", error);
+      setError("Failed to navigate to match recording. Please try again.");
+      setSuccessMessage(null);
       setIsSavingTeam(false);
     }
   };
@@ -107,17 +147,17 @@ export default function TeamsPage() {
   const getRoleColor = (role: Role): string => {
     switch (role) {
       case "Roam":
-        return "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200";
+        return "bg-purple-100 dark:bg-purple-900/40 text-purple-900 dark:text-purple-100";
       case "Mid":
-        return "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200";
+        return "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-900 dark:text-yellow-100";
       case "Gold":
-        return "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200";
+        return "bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-100";
       case "Jungle":
-        return "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200";
+        return "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-900 dark:text-emerald-100";
       case "Exp":
-        return "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-200";
+        return "bg-cyan-100 dark:bg-cyan-900/40 text-cyan-900 dark:text-cyan-100";
       default:
-        return "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200";
+        return "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100";
     }
   };
 
@@ -159,8 +199,12 @@ export default function TeamsPage() {
     return score;
   };
 
-  // Randomize teams with role optimization
+  // Randomize teams with MMR balancing and role optimization
   const randomizeTeams = () => {
+    // Clear any messages
+    setError(null);
+    setSuccessMessage(null);
+
     // Filter to only use selected players, and ensure we have at least 2
     const selectedPlayers = players.filter((p) => p.isSelected);
     if (selectedPlayers.length < 2) {
@@ -168,45 +212,25 @@ export default function TeamsPage() {
       return;
     }
 
-    // Separate players by category
-    const experts = selectedPlayers.filter((p) => p.category === "Expert");
-    const intermediates = selectedPlayers.filter(
-      (p) => p.category === "Intermediate"
-    );
-    const beginners = selectedPlayers.filter((p) => p.category === "Beginner");
+    // Sort players by MMR (descending)
+    const sortedPlayers = [...selectedPlayers].sort((a, b) => {
+      const aMmr = a.stats?.mmr || a.mmr;
+      const bMmr = b.stats?.mmr || b.mmr;
+      return bMmr - aMmr; // descending order
+    });
 
-    // Shuffle all arrays
-    const shuffledExperts = [...experts].sort(() => Math.random() - 0.5);
-    const shuffledIntermediates = [...intermediates].sort(
-      () => Math.random() - 0.5
-    );
-    const shuffledBeginners = [...beginners].sort(() => Math.random() - 0.5);
-
-    // Initial distribution based on skill level
+    // Initial distribution based on MMR - alternating to make teams even
     const team1: Player[] = [];
     const team2: Player[] = [];
 
-    // First distribute experts evenly
-    shuffledExperts.forEach((player, index) => {
-      if (index % 2 === 0) {
-        team1.push(player);
-      } else {
-        team2.push(player);
-      }
-    });
-
-    // Then distribute intermediates evenly
-    shuffledIntermediates.forEach((player, index) => {
-      if (index % 2 === 0) {
-        team1.push(player);
-      } else {
-        team2.push(player);
-      }
-    });
-
-    // Then distribute beginners evenly
-    shuffledBeginners.forEach((player, index) => {
-      if (index % 2 === 0) {
+    // Distribute players with a "snake draft" pattern to ensure fairness
+    // 1,4,5,8,9 go to team1, 2,3,6,7,10 go to team2
+    sortedPlayers.forEach((player, index) => {
+      // "Snake" pattern for balanced MMR distribution
+      // In a 10-player game, distribution would be:
+      // Team 1: 1st, 4th, 5th, 8th, 9th picks
+      // Team 2: 2nd, 3rd, 6th, 7th, 10th picks
+      if (index % 4 === 0 || index % 4 === 3) {
         team1.push(player);
       } else {
         team2.push(player);
@@ -214,118 +238,58 @@ export default function TeamsPage() {
     });
 
     // Balance team sizes if needed
-    if (selectedPlayers.length % 2 === 0 && team1.length !== team2.length) {
-      // Move players to balance teams while maintaining skill distribution
-      if (team1.length > team2.length) {
+    if (selectedPlayers.length % 2 !== 0) {
+      // If odd number of players, ensure teams differ by at most 1 player
+      if (team1.length > team2.length + 1) {
         const playerToMove = team1[team1.length - 1];
         team1.pop();
         team2.push(playerToMove);
-      } else {
+      } else if (team2.length > team1.length + 1) {
         const playerToMove = team2[team2.length - 1];
         team2.pop();
         team1.push(playerToMove);
       }
     }
 
-    // Try to optimize role distribution - simple monte carlo approach
+    // Try to optimize role distribution while maintaining MMR balance - monte carlo approach
     // Try multiple random swaps and keep the best arrangement
     let bestTeam1 = [...team1];
     let bestTeam2 = [...team2];
-    let bestScore =
+
+    // Calculate initial MMR difference and role scores
+    const initialMmrDiff = Math.abs(
+      calculateTeamAverageMmr(team1) - calculateTeamAverageMmr(team2)
+    );
+    const initialRoleScore =
       calculateTeamRoleScore(team1) + calculateTeamRoleScore(team2);
 
-    // Try a few random player swaps to improve role balance
-    for (let attempt = 0; attempt < 100; attempt++) {
-      // Keep team sizes equal (or as equal as possible for odd total)
+    // Combined score: we want high role score and low MMR difference
+    let bestScore = initialRoleScore - initialMmrDiff * 2;
+
+    // Try random player swaps to improve role balance while keeping MMR balance
+    for (let attempt = 0; attempt < 200; attempt++) {
       const team1Temp = [...team1];
       const team2Temp = [...team2];
 
-      // Randomly select players to swap (within same category if possible)
-      const team1ExpertIndices = team1Temp
-        .map((player, index) => (player.category === "Expert" ? index : -1))
-        .filter((index) => index !== -1);
+      // Choose random players from each team to swap
+      const team1Index = Math.floor(Math.random() * team1Temp.length);
+      const team2Index = Math.floor(Math.random() * team2Temp.length);
 
-      const team1IntermediateIndices = team1Temp
-        .map((player, index) =>
-          player.category === "Intermediate" ? index : -1
-        )
-        .filter((index) => index !== -1);
+      // Swap players
+      [team1Temp[team1Index], team2Temp[team2Index]] = [
+        team2Temp[team2Index],
+        team1Temp[team1Index],
+      ];
 
-      const team1BeginnerIndices = team1Temp
-        .map((player, index) => (player.category === "Beginner" ? index : -1))
-        .filter((index) => index !== -1);
-
-      const team2ExpertIndices = team2Temp
-        .map((player, index) => (player.category === "Expert" ? index : -1))
-        .filter((index) => index !== -1);
-
-      const team2IntermediateIndices = team2Temp
-        .map((player, index) =>
-          player.category === "Intermediate" ? index : -1
-        )
-        .filter((index) => index !== -1);
-
-      const team2BeginnerIndices = team2Temp
-        .map((player, index) => (player.category === "Beginner" ? index : -1))
-        .filter((index) => index !== -1);
-
-      // Try to swap within same category
-      if (team1ExpertIndices.length > 0 && team2ExpertIndices.length > 0) {
-        const index1 =
-          team1ExpertIndices[
-            Math.floor(Math.random() * team1ExpertIndices.length)
-          ];
-        const index2 =
-          team2ExpertIndices[
-            Math.floor(Math.random() * team2ExpertIndices.length)
-          ];
-
-        // Swap players
-        [team1Temp[index1], team2Temp[index2]] = [
-          team2Temp[index2],
-          team1Temp[index1],
-        ];
-      } else if (
-        team1IntermediateIndices.length > 0 &&
-        team2IntermediateIndices.length > 0
-      ) {
-        const index1 =
-          team1IntermediateIndices[
-            Math.floor(Math.random() * team1IntermediateIndices.length)
-          ];
-        const index2 =
-          team2IntermediateIndices[
-            Math.floor(Math.random() * team2IntermediateIndices.length)
-          ];
-
-        // Swap players
-        [team1Temp[index1], team2Temp[index2]] = [
-          team2Temp[index2],
-          team1Temp[index1],
-        ];
-      } else if (
-        team1BeginnerIndices.length > 0 &&
-        team2BeginnerIndices.length > 0
-      ) {
-        const index1 =
-          team1BeginnerIndices[
-            Math.floor(Math.random() * team1BeginnerIndices.length)
-          ];
-        const index2 =
-          team2BeginnerIndices[
-            Math.floor(Math.random() * team2BeginnerIndices.length)
-          ];
-
-        // Swap players
-        [team1Temp[index1], team2Temp[index2]] = [
-          team2Temp[index2],
-          team1Temp[index1],
-        ];
-      }
-
-      // Calculate score for this arrangement
-      const score =
+      // Calculate new scores after swap
+      const roleScore =
         calculateTeamRoleScore(team1Temp) + calculateTeamRoleScore(team2Temp);
+      const mmrDiff = Math.abs(
+        calculateTeamAverageMmr(team1Temp) - calculateTeamAverageMmr(team2Temp)
+      );
+
+      // Combined score: prioritize role coverage but penalize MMR imbalance
+      const score = roleScore - mmrDiff * 2;
 
       // Keep this arrangement if it's better
       if (score > bestScore) {
@@ -341,23 +305,27 @@ export default function TeamsPage() {
   return (
     <div>
       <section className="mb-8">
-        <h1 className="text-3xl font-bold text-center mb-4 text-blue-700 dark:text-blue-400">
-          Team Creator
+        <h1 className="text-3xl font-bold text-center mb-4 text-blue-800 dark:text-blue-300">
+          MMR-Based Team Creator
         </h1>
-        <p className="text-center text-gray-600 dark:text-gray-400">
-          Select players and create balanced teams for matches
+        <p className="text-center text-gray-700 dark:text-gray-300">
+          Create balanced teams based on MMR ratings and role preferences
         </p>
       </section>
 
       {/* Player Selection */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-blue-600 dark:text-blue-400">
+          <h2 className="text-xl font-semibold text-blue-800 dark:text-blue-300">
             Player Pool ({players.length})
           </h2>
-          <div className="text-sm text-gray-600 dark:text-gray-400">
+          <div className="text-sm text-gray-700 dark:text-gray-300">
             <span
-              className={selectedCount === 10 ? "text-green-500 font-bold" : ""}
+              className={
+                selectedCount === 10
+                  ? "text-green-700 dark:text-green-300 font-bold"
+                  : ""
+              }
             >
               {selectedCount}/10 players selected
             </span>
@@ -367,24 +335,27 @@ export default function TeamsPage() {
         {isLoading && !players.length ? (
           <div className="flex justify-center items-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
-            <span className="ml-2 text-gray-600 dark:text-gray-400">
+            <span className="ml-2 text-gray-700 dark:text-gray-300">
               Loading players...
             </span>
           </div>
         ) : error ? (
-          <div className="p-4 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-md text-center">
+          <div className="p-4 bg-red-50 dark:bg-red-900/40 text-red-700 dark:text-red-300 rounded-md text-center font-medium">
             {error}{" "}
             <button
               onClick={() => window.location.reload()}
-              className="underline ml-2"
+              className="underline ml-2 font-semibold"
             >
               Retry
             </button>
           </div>
         ) : players.length === 0 ? (
-          <p className="text-center text-gray-500 dark:text-gray-400 my-8">
+          <p className="text-center text-gray-700 dark:text-gray-300 my-8">
             No players added yet.{" "}
-            <a href="/players" className="text-blue-500 hover:underline">
+            <a
+              href="/players"
+              className="text-blue-700 dark:text-blue-300 hover:underline font-medium"
+            >
               Add players
             </a>{" "}
             before creating teams.
@@ -394,83 +365,99 @@ export default function TeamsPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b dark:border-gray-700">
-                  <th className="text-left py-2 px-4">Select</th>
-                  <th className="text-left py-2 px-4">Name</th>
-                  <th className="text-left py-2 px-4">Skill</th>
-                  <th className="text-left py-2 px-4">Roles</th>
-                  <th className="text-left py-2 px-4">Stats</th>
+                  <th className="text-left py-2 px-4 text-gray-800 dark:text-gray-200">
+                    Select
+                  </th>
+                  <th className="text-left py-2 px-4 text-gray-800 dark:text-gray-200">
+                    Name
+                  </th>
+                  <th className="text-left py-2 px-4 text-gray-800 dark:text-gray-200">
+                    MMR
+                  </th>
+                  <th className="text-left py-2 px-4 text-gray-800 dark:text-gray-200">
+                    Roles
+                  </th>
+                  <th className="text-left py-2 px-4 text-gray-800 dark:text-gray-200">
+                    Stats
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {players.map((player, index) => (
-                  <tr
-                    key={player.id || index}
-                    className={`border-b dark:border-gray-700 ${
-                      player.isSelected
-                        ? "bg-purple-50 dark:bg-purple-900/20"
-                        : ""
-                    }`}
-                  >
-                    <td className="py-2 px-4">
-                      <input
-                        type="checkbox"
-                        checked={player.isSelected || false}
-                        onChange={() => togglePlayerSelection(player)}
-                        disabled={!player.isSelected && selectedCount >= 10}
-                        className="h-5 w-5 text-purple-600 rounded focus:ring-purple-500"
-                      />
-                    </td>
-                    <td className="py-2 px-4">{player.name}</td>
-                    <td className="py-2 px-4">
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          player.category === "Expert"
-                            ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200"
-                            : player.category === "Intermediate"
-                            ? "bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200"
-                            : "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200"
-                        }`}
-                      >
-                        {player.category}
-                      </span>
-                    </td>
-                    <td className="py-2 px-4">
-                      <div className="flex flex-wrap gap-1">
-                        {player.roles.map((role) => (
+                {players.map((player, index) => {
+                  const playerMmr = player.stats?.mmr || player.mmr;
+                  return (
+                    <tr
+                      key={player.id || index}
+                      className={`border-b dark:border-gray-700 ${
+                        player.isSelected
+                          ? "bg-purple-50 dark:bg-purple-900/20"
+                          : ""
+                      }`}
+                    >
+                      <td className="py-2 px-4">
+                        <input
+                          type="checkbox"
+                          checked={player.isSelected || false}
+                          onChange={() => togglePlayerSelection(player)}
+                          disabled={!player.isSelected && selectedCount >= 10}
+                          className="h-5 w-5 text-purple-600 rounded focus:ring-purple-500"
+                        />
+                      </td>
+                      <td className="py-2 px-4 text-gray-900 dark:text-white font-medium">
+                        {player.name}
+                      </td>
+                      <td className="py-2 px-4">
+                        <div>
                           <span
-                            key={role}
-                            className={`text-xs px-2 py-0.5 rounded-full ${getRoleColor(
-                              role
+                            className={`text-xs px-2 py-1 rounded-full ${getMmrTierColor(
+                              playerMmr
                             )}`}
                           >
-                            {role}
+                            {playerMmr}
                           </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="py-2 px-4">
-                      {player.stats ? (
-                        <div className="text-xs">
-                          <span className="text-green-600 dark:text-green-400 font-medium">
-                            {player.stats.wins}W
-                          </span>
-                          {" - "}
-                          <span className="text-red-600 dark:text-red-400 font-medium">
-                            {player.stats.losses}L
-                          </span>
-                          {" | "}
-                          <span className="font-medium">
-                            {player.stats.winRate?.toFixed(1)}%
+                          <span className="text-xs ml-1 text-gray-700 dark:text-gray-300">
+                            {getMmrTierName(playerMmr)}
                           </span>
                         </div>
-                      ) : (
-                        <span className="text-xs text-gray-500">
-                          No matches
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="py-2 px-4">
+                        <div className="flex flex-wrap gap-1">
+                          {player.roles.map((role) => (
+                            <span
+                              key={role}
+                              className={`text-xs px-2 py-0.5 rounded-full ${getRoleColor(
+                                role
+                              )}`}
+                            >
+                              {role}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="py-2 px-4">
+                        {player.stats ? (
+                          <div className="text-xs">
+                            <span className="text-green-700 dark:text-green-300 font-medium">
+                              {player.stats.wins}W
+                            </span>
+                            {" - "}
+                            <span className="text-red-700 dark:text-red-300 font-medium">
+                              {player.stats.losses}L
+                            </span>
+                            {" | "}
+                            <span className="font-medium text-gray-700 dark:text-gray-300">
+                              {player.stats.winRate?.toFixed(1)}%
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-700 dark:text-gray-300">
+                            No matches
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -491,20 +478,45 @@ export default function TeamsPage() {
           </button>
 
           {teams && (
-            <button
-              onClick={saveCurrentTeams}
-              disabled={isSavingTeam}
-              className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white py-2 px-6 rounded-lg text-sm font-medium shadow-md transition-colors mx-auto flex items-center"
-            >
-              {isSavingTeam ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                  Saving...
-                </>
-              ) : (
-                "Save & Record Match Results"
+            <div className="flex flex-col gap-4 items-center mt-4">
+              {successMessage && (
+                <div className="p-3 bg-green-50 dark:bg-green-900/40 text-green-700 dark:text-green-300 rounded-md text-center w-full max-w-md mb-2 font-medium">
+                  {successMessage}
+                </div>
               )}
-            </button>
+
+              <div className="flex gap-4 justify-center">
+                <button
+                  onClick={saveCurrentTeams}
+                  disabled={isSavingTeam}
+                  className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white py-2 px-6 rounded-lg text-sm font-medium shadow-md transition-colors flex items-center"
+                >
+                  {isSavingTeam ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Teams"
+                  )}
+                </button>
+
+                <button
+                  onClick={goToMatchRecording}
+                  disabled={isSavingTeam}
+                  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-2 px-6 rounded-lg text-sm font-medium shadow-md transition-colors flex items-center"
+                >
+                  {isSavingTeam ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    "Save & Record Match"
+                  )}
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>
@@ -513,27 +525,18 @@ export default function TeamsPage() {
       {teams && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4 text-red-600 dark:text-red-400">
+            <h2 className="text-xl font-semibold mb-4 text-red-800 dark:text-red-300">
               Team 1{" "}
-              <span className="text-sm font-normal text-gray-600 dark:text-gray-400">
+              <span className="text-sm font-normal text-gray-700 dark:text-gray-300">
                 ({teams.team1.length} players)
               </span>
             </h2>
-            <div className="mb-3 flex flex-wrap gap-2">
-              <span className="text-xs bg-blue-100 dark:bg-blue-900/50 px-2 py-1 rounded-full">
-                {teams.team1.filter((p) => p.category === "Expert").length}{" "}
-                experts
+            <div className="mb-3 flex flex-wrap gap-2 items-center">
+              <span className="text-sm font-semibold">
+                Avg MMR: {calculateTeamAverageMmr(teams.team1)}
               </span>
-              <span className="text-xs bg-orange-100 dark:bg-orange-900/50 px-2 py-1 rounded-full">
-                {
-                  teams.team1.filter((p) => p.category === "Intermediate")
-                    .length
-                }{" "}
-                intermediates
-              </span>
-              <span className="text-xs bg-green-100 dark:bg-green-900/50 px-2 py-1 rounded-full">
-                {teams.team1.filter((p) => p.category === "Beginner").length}{" "}
-                beginners
+              <span className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                {getMmrTierName(calculateTeamAverageMmr(teams.team1))}
               </span>
             </div>
 
@@ -553,7 +556,7 @@ export default function TeamsPage() {
                         className={`px-2 py-1 rounded-full ${
                           count > 0
                             ? getRoleColor(role)
-                            : "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200"
+                            : "bg-red-100 dark:bg-red-800 text-red-900 dark:text-red-100"
                         }`}
                       >
                         {role}: {count}
@@ -565,81 +568,63 @@ export default function TeamsPage() {
             </div>
 
             <ul className="space-y-2">
-              {teams.team1.map((player, index) => (
-                <li
-                  key={index}
-                  className={`p-3 rounded flex flex-col ${
-                    player.category === "Expert"
-                      ? "bg-blue-50 dark:bg-blue-900/30"
-                      : player.category === "Intermediate"
-                      ? "bg-orange-50 dark:bg-orange-900/30"
-                      : "bg-green-50 dark:bg-green-900/30"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center">
-                      <span
-                        className={`w-2 h-2 rounded-full mr-2 ${
-                          player.category === "Expert"
-                            ? "bg-blue-500"
-                            : player.category === "Intermediate"
-                            ? "bg-orange-500"
-                            : "bg-green-500"
-                        }`}
-                      ></span>
-                      <span className="font-medium">{player.name}</span>
-                      <span
-                        className={`ml-2 text-xs px-2 py-0.5 rounded ${
-                          player.category === "Expert"
-                            ? "bg-blue-200 dark:bg-blue-800"
-                            : player.category === "Intermediate"
-                            ? "bg-orange-200 dark:bg-orange-800"
-                            : "bg-green-200 dark:bg-green-800"
-                        }`}
-                      >
-                        {player.category}
+              {teams.team1.map((player, index) => {
+                const playerMmr = player.stats?.mmr || player.mmr;
+                return (
+                  <li
+                    key={index}
+                    className="p-3 rounded flex flex-col bg-slate-700 dark:bg-gray-750"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <span className="font-medium text-gray-900 dark:text-white">
+                          {player.name}
+                        </span>
+                        <span
+                          className={`ml-2 text-xs px-2 py-0.5 rounded ${getMmrTierColor(
+                            playerMmr
+                          )}`}
+                        >
+                          {playerMmr} MMR
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between">
+                      <div className="flex flex-wrap gap-1">
+                        {player.roles.map((role) => (
+                          <span
+                            key={role}
+                            className={`text-xs px-2 py-0.5 rounded-full ${getRoleColor(
+                              role
+                            )}`}
+                          >
+                            {role}
+                          </span>
+                        ))}
+                      </div>
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        {getMmrTierName(playerMmr)}
                       </span>
                     </div>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {player.roles.map((role) => (
-                      <span
-                        key={role}
-                        className={`text-xs px-2 py-0.5 rounded-full ${getRoleColor(
-                          role
-                        )}`}
-                      >
-                        {role}
-                      </span>
-                    ))}
-                  </div>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4 text-indigo-600 dark:text-indigo-400">
+            <h2 className="text-xl font-semibold mb-4 text-indigo-800 dark:text-indigo-300">
               Team 2{" "}
-              <span className="text-sm font-normal text-gray-600 dark:text-gray-400">
+              <span className="text-sm font-normal text-gray-700 dark:text-gray-300">
                 ({teams.team2.length} players)
               </span>
             </h2>
-            <div className="mb-3 flex flex-wrap gap-2">
-              <span className="text-xs bg-blue-100 dark:bg-blue-900/50 px-2 py-1 rounded-full">
-                {teams.team2.filter((p) => p.category === "Expert").length}{" "}
-                experts
+            <div className="mb-3 flex flex-wrap gap-2 items-center">
+              <span className="text-sm font-semibold">
+                Avg MMR: {calculateTeamAverageMmr(teams.team2)}
               </span>
-              <span className="text-xs bg-orange-100 dark:bg-orange-900/50 px-2 py-1 rounded-full">
-                {
-                  teams.team2.filter((p) => p.category === "Intermediate")
-                    .length
-                }{" "}
-                intermediates
-              </span>
-              <span className="text-xs bg-green-100 dark:bg-green-900/50 px-2 py-1 rounded-full">
-                {teams.team2.filter((p) => p.category === "Beginner").length}{" "}
-                beginners
+              <span className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                {getMmrTierName(calculateTeamAverageMmr(teams.team2))}
               </span>
             </div>
 
@@ -659,7 +644,7 @@ export default function TeamsPage() {
                         className={`px-2 py-1 rounded-full ${
                           count > 0
                             ? getRoleColor(role)
-                            : "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200"
+                            : "bg-red-100 dark:bg-red-800 text-red-900 dark:text-red-100"
                         }`}
                       >
                         {role}: {count}
@@ -671,56 +656,47 @@ export default function TeamsPage() {
             </div>
 
             <ul className="space-y-2">
-              {teams.team2.map((player, index) => (
-                <li
-                  key={index}
-                  className={`p-3 rounded flex flex-col ${
-                    player.category === "Expert"
-                      ? "bg-blue-50 dark:bg-blue-900/30"
-                      : player.category === "Intermediate"
-                      ? "bg-orange-50 dark:bg-orange-900/30"
-                      : "bg-green-50 dark:bg-green-900/30"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center">
-                      <span
-                        className={`w-2 h-2 rounded-full mr-2 ${
-                          player.category === "Expert"
-                            ? "bg-blue-500"
-                            : player.category === "Intermediate"
-                            ? "bg-orange-500"
-                            : "bg-green-500"
-                        }`}
-                      ></span>
-                      <span className="font-medium">{player.name}</span>
-                      <span
-                        className={`ml-2 text-xs px-2 py-0.5 rounded ${
-                          player.category === "Expert"
-                            ? "bg-blue-200 dark:bg-blue-800"
-                            : player.category === "Intermediate"
-                            ? "bg-orange-200 dark:bg-orange-800"
-                            : "bg-green-200 dark:bg-green-800"
-                        }`}
-                      >
-                        {player.category}
+              {teams.team2.map((player, index) => {
+                const playerMmr = player.stats?.mmr || player.mmr;
+                return (
+                  <li
+                    key={index}
+                    className="p-3 rounded flex flex-col bg-slate-700 dark:bg-gray-750"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <span className="font-medium text-gray-900 dark:text-white">
+                          {player.name}
+                        </span>
+                        <span
+                          className={`ml-2 text-xs px-2 py-0.5 rounded ${getMmrTierColor(
+                            playerMmr
+                          )}`}
+                        >
+                          {playerMmr} MMR
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between">
+                      <div className="flex flex-wrap gap-1">
+                        {player.roles.map((role) => (
+                          <span
+                            key={role}
+                            className={`text-xs px-2 py-0.5 rounded-full ${getRoleColor(
+                              role
+                            )}`}
+                          >
+                            {role}
+                          </span>
+                        ))}
+                      </div>
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        {getMmrTierName(playerMmr)}
                       </span>
                     </div>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {player.roles.map((role) => (
-                      <span
-                        key={role}
-                        className={`text-xs px-2 py-0.5 rounded-full ${getRoleColor(
-                          role
-                        )}`}
-                      >
-                        {role}
-                      </span>
-                    ))}
-                  </div>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>

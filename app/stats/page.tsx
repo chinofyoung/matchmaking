@@ -4,14 +4,19 @@ import { useState, useEffect } from "react";
 import { getPlayersFromFirestore } from "@/firebase/playerService";
 import { getTopPlayersByWinRate } from "@/firebase/matchService";
 import { Player, Role } from "@/app/types";
-import { getMmrTierName, getMmrTierColor } from "@/firebase/mmrService";
+import {
+  getMmrTierName,
+  getMmrTierColor,
+  MmrTier,
+  DEFAULT_MMR_VALUES,
+} from "@/firebase/mmrService";
 
 export default function StatsPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [filterMmrTier, setFilterMmrTier] = useState<string>("all");
   const [filterRole, setFilterRole] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("winRate");
 
@@ -29,7 +34,7 @@ export default function StatsPage() {
         );
 
         setPlayers(playersWithStats);
-        applyFilters(playersWithStats, filterCategory, filterRole, sortBy);
+        applyFilters(playersWithStats, filterMmrTier, filterRole, sortBy);
       } catch (error) {
         console.error("Error loading player statistics:", error);
         setError("Failed to load player statistics. Please try again later.");
@@ -43,15 +48,18 @@ export default function StatsPage() {
 
   const applyFilters = (
     playersToFilter: Player[],
-    category: string,
+    mmrTier: string,
     role: string,
     sortField: string
   ) => {
-    // Apply category filter
+    // Apply MMR tier filter
     let result = [...playersToFilter];
 
-    if (category !== "all") {
-      result = result.filter((player) => player.category === category);
+    if (mmrTier !== "all") {
+      result = result.filter((player) => {
+        const playerMmr = player.stats?.mmr || player.mmr;
+        return getMmrTierName(playerMmr) === mmrTier;
+      });
     }
 
     // Apply role filter
@@ -68,7 +76,9 @@ export default function StatsPage() {
       } else if (sortField === "matchesPlayed") {
         return (b.stats?.matchesPlayed || 0) - (a.stats?.matchesPlayed || 0);
       } else if (sortField === "mmr") {
-        return (b.stats?.mmr || 0) - (a.stats?.mmr || 0);
+        const bMmr = b.stats?.mmr || b.mmr;
+        const aMmr = a.stats?.mmr || a.mmr;
+        return bMmr - aMmr;
       } else {
         return (b.stats?.winRate || 0) - (a.stats?.winRate || 0);
       }
@@ -81,19 +91,31 @@ export default function StatsPage() {
   const getRoleColor = (role: Role): string => {
     switch (role) {
       case "Roam":
-        return "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200";
+        return "bg-purple-100 dark:bg-purple-900/40 text-purple-900 dark:text-purple-100";
       case "Mid":
-        return "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200";
+        return "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-900 dark:text-yellow-100";
       case "Gold":
-        return "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200";
+        return "bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-100";
       case "Jungle":
-        return "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200";
+        return "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-900 dark:text-emerald-100";
       case "Exp":
-        return "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-200";
+        return "bg-cyan-100 dark:bg-cyan-900/40 text-cyan-900 dark:text-cyan-100";
       default:
-        return "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200";
+        return "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100";
     }
   };
+
+  // Available MMR tiers
+  const availableTiers: MmrTier[] = [
+    "Bubu",
+    "SemiBubu",
+    "MaaramGuti",
+    "Maaram",
+    "DiriMakarit",
+    "Makarit",
+    "MakaritKaritan",
+    "PinakaMakarit",
+  ];
 
   return (
     <div>
@@ -101,7 +123,7 @@ export default function StatsPage() {
         <h1 className="text-3xl font-bold text-center mb-4 text-green-700 dark:text-green-400">
           Player Statistics
         </h1>
-        <p className="text-center text-gray-600 dark:text-gray-400 mb-8">
+        <p className="text-center text-gray-700 dark:text-gray-300 mb-8">
           View and analyze player performance and rankings
         </p>
       </section>
@@ -127,15 +149,15 @@ export default function StatsPage() {
             <>
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                  {/* Category filter */}
+                  {/* MMR Tier filter */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Filter by Category
+                    <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
+                      Filter by MMR Tier
                     </label>
                     <select
-                      value={filterCategory}
+                      value={filterMmrTier}
                       onChange={(e) => {
-                        setFilterCategory(e.target.value);
+                        setFilterMmrTier(e.target.value);
                         applyFilters(
                           players,
                           e.target.value,
@@ -143,18 +165,20 @@ export default function StatsPage() {
                           sortBy
                         );
                       }}
-                      className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
-                      <option value="all">All Categories</option>
-                      <option value="Expert">Expert</option>
-                      <option value="Intermediate">Intermediate</option>
-                      <option value="Beginner">Beginner</option>
+                      <option value="all">All Tiers</option>
+                      {availableTiers.map((tier) => (
+                        <option key={tier} value={tier}>
+                          {tier}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
                   {/* Role filter */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                       Filter by Role
                     </label>
                     <select
@@ -163,12 +187,12 @@ export default function StatsPage() {
                         setFilterRole(e.target.value);
                         applyFilters(
                           players,
-                          filterCategory,
+                          filterMmrTier,
                           e.target.value,
                           sortBy
                         );
                       }}
-                      className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
                       <option value="all">All Roles</option>
                       <option value="Roam">Roam</option>
@@ -190,7 +214,7 @@ export default function StatsPage() {
                         setSortBy(e.target.value);
                         applyFilters(
                           players,
-                          filterCategory,
+                          filterMmrTier,
                           filterRole,
                           e.target.value
                         );
@@ -205,7 +229,7 @@ export default function StatsPage() {
                   </div>
 
                   {/* Statistics summary */}
-                  <div className="bg-gray-50 dark:bg-gray-900/30 p-3 rounded-lg">
+                  <div className="bg-slate-700 dark:bg-gray-900/30 p-3 rounded-lg">
                     <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Current Selection
                     </h3>
@@ -224,10 +248,10 @@ export default function StatsPage() {
                       <p>
                         Avg. MMR:{" "}
                         {Math.round(
-                          filteredPlayers.reduce(
-                            (acc, player) => acc + (player.stats?.mmr || 0),
-                            0
-                          ) / (filteredPlayers.length || 1)
+                          filteredPlayers.reduce((acc, player) => {
+                            const mmr = player.stats?.mmr || player.mmr;
+                            return acc + mmr;
+                          }, 0) / (filteredPlayers.length || 1)
                         )}
                       </p>
                     </div>
@@ -237,7 +261,7 @@ export default function StatsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
+                      <tr className="bg-slate-700 dark:bg-gray-700 border-b dark:border-gray-600">
                         <th className="py-3 px-4 text-left font-medium">
                           Rank
                         </th>
@@ -245,7 +269,7 @@ export default function StatsPage() {
                           Player
                         </th>
                         <th className="py-3 px-4 text-left font-medium">
-                          Category
+                          MMR Tier
                         </th>
                         <th className="py-3 px-4 text-left font-medium">
                           Roles
@@ -265,119 +289,112 @@ export default function StatsPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                      {filteredPlayers.map((player, index) => (
-                        <tr
-                          key={player.id}
-                          className={`hover:bg-gray-50 dark:hover:bg-gray-750 ${
-                            index === 0 && filteredPlayers.length > 1
-                              ? "bg-yellow-50 dark:bg-yellow-900/10"
-                              : ""
-                          }`}
-                        >
-                          <td className="py-3 px-4">
-                            {index < 3 ? (
+                      {filteredPlayers.map((player, index) => {
+                        const playerMmr = player.stats?.mmr || player.mmr;
+                        return (
+                          <tr
+                            key={player.id}
+                            className={`hover:bg-slate-700 dark:hover:bg-gray-750 ${
+                              index === 0 && filteredPlayers.length > 1
+                                ? "bg-yellow-50 dark:bg-yellow-900/10"
+                                : ""
+                            }`}
+                          >
+                            <td className="py-3 px-4">
+                              {index < 3 ? (
+                                <span
+                                  className={`
+                                  inline-flex items-center justify-center w-6 h-6 rounded-full 
+                                  ${
+                                    index === 0
+                                      ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                                      : ""
+                                  }
+                                  ${
+                                    index === 1
+                                      ? "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                                      : ""
+                                  }
+                                  ${
+                                    index === 2
+                                      ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
+                                      : ""
+                                  }
+                                `}
+                                >
+                                  {index === 0
+                                    ? "🥇"
+                                    : index === 1
+                                    ? "🥈"
+                                    : "🥉"}
+                                </span>
+                              ) : (
+                                <span className="px-2">{index + 1}</span>
+                              )}
+                            </td>
+                            <td className="py-3 px-4 font-medium">
+                              {player.name}
+                            </td>
+                            <td className="py-3 px-4">
                               <span
-                                className={`
-                                inline-flex items-center justify-center w-6 h-6 rounded-full 
-                                ${
-                                  index === 0
-                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
-                                    : ""
-                                }
-                                ${
-                                  index === 1
-                                    ? "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                                    : ""
-                                }
-                                ${
-                                  index === 2
-                                    ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
-                                    : ""
-                                }
-                              `}
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${getMmrTierColor(
+                                  playerMmr
+                                )}`}
                               >
-                                {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
+                                {getMmrTierName(playerMmr)}
                               </span>
-                            ) : (
-                              <span className="px-2">{index + 1}</span>
-                            )}
-                          </td>
-                          <td className="py-3 px-4 font-medium">
-                            {player.name}
-                          </td>
-                          <td className="py-3 px-4">
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium
-                              ${
-                                player.category === "Expert"
-                                  ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200"
-                                  : player.category === "Intermediate"
-                                  ? "bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200"
-                                  : "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200"
-                              }`}
-                            >
-                              {player.category}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="flex flex-wrap gap-1">
-                              {player.roles.map((role) => (
-                                <span
-                                  key={role}
-                                  className={`text-xs px-2 py-0.5 rounded-full ${getRoleColor(
-                                    role
-                                  )}`}
-                                >
-                                  {role}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            {player.stats?.mmr ? (
-                              <div>
-                                <span
-                                  className={getMmrTierColor(player.stats.mmr)}
-                                >
-                                  {player.stats.mmr}
-                                </span>
-                                <div className="text-xs">
-                                  {getMmrTierName(player.stats.mmr)}
-                                </div>
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="flex flex-wrap gap-1">
+                                {player.roles.map((role) => (
+                                  <span
+                                    key={role}
+                                    className={`text-xs px-2 py-0.5 rounded-full ${getRoleColor(
+                                      role
+                                    )}`}
+                                  >
+                                    {role}
+                                  </span>
+                                ))}
                               </div>
-                            ) : (
-                              <span className="text-gray-500">N/A</span>
-                            )}
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            <span
-                              className={`font-medium ${
-                                (player.stats?.winRate || 0) >= 60
-                                  ? "text-green-600 dark:text-green-400"
-                                  : (player.stats?.winRate || 0) >= 45
-                                  ? "text-blue-600 dark:text-blue-400"
-                                  : "text-red-600 dark:text-red-400"
-                              }`}
-                            >
-                              {player.stats?.winRate || 0}%
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            <span className="text-green-600 dark:text-green-400">
-                              {player.stats?.wins || 0}
-                            </span>
-                            <span className="text-gray-500 dark:text-gray-400 mx-1">
-                              /
-                            </span>
-                            <span className="text-red-600 dark:text-red-400">
-                              {player.stats?.losses || 0}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            {player.stats?.matchesPlayed || 0}
-                          </td>
-                        </tr>
-                      ))}
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              <div>
+                                <span className={getMmrTierColor(playerMmr)}>
+                                  {playerMmr}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              <span
+                                className={`font-medium ${
+                                  (player.stats?.winRate || 0) >= 60
+                                    ? "text-green-600 dark:text-green-400"
+                                    : (player.stats?.winRate || 0) >= 45
+                                    ? "text-blue-600 dark:text-blue-400"
+                                    : "text-red-600 dark:text-red-400"
+                                }`}
+                              >
+                                {player.stats?.winRate || 0}%
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              <span className="text-green-600 dark:text-green-400">
+                                {player.stats?.wins || 0}
+                              </span>
+                              <span className="text-gray-500 dark:text-gray-400 mx-1">
+                                /
+                              </span>
+                              <span className="text-red-600 dark:text-red-400">
+                                {player.stats?.losses || 0}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              {player.stats?.matchesPlayed || 0}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

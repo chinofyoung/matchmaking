@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { recordMatchResult } from "@/firebase/matchService";
 import { getRecentTeamCompositions } from "@/firebase/playerService";
 import { TeamComposition, Player } from "@/app/types";
+import { getMmrTierColor } from "@/firebase/mmrService";
 
 export default function RecordMatchPage() {
   const router = useRouter();
@@ -172,13 +173,9 @@ export default function RecordMatchPage() {
                     (player: Player, index: number) => (
                       <li key={index} className="text-sm flex items-center">
                         <span
-                          className={`w-2 h-2 rounded-full mr-2 ${
-                            player.category === "Expert"
-                              ? "bg-blue-500"
-                              : player.category === "Intermediate"
-                              ? "bg-orange-500"
-                              : "bg-green-500"
-                          }`}
+                          className={`w-2 h-2 rounded-full mr-2 ${getMmrTierColor(
+                            player.stats?.mmr || player.mmr
+                          ).replace("text-", "bg-")}`}
                         ></span>
                         <span>{player.name}</span>
                         <div className="ml-2 flex flex-wrap gap-1">
@@ -233,13 +230,9 @@ export default function RecordMatchPage() {
                     (player: Player, index: number) => (
                       <li key={index} className="text-sm flex items-center">
                         <span
-                          className={`w-2 h-2 rounded-full mr-2 ${
-                            player.category === "Expert"
-                              ? "bg-blue-500"
-                              : player.category === "Intermediate"
-                              ? "bg-orange-500"
-                              : "bg-green-500"
-                          }`}
+                          className={`w-2 h-2 rounded-full mr-2 ${getMmrTierColor(
+                            player.stats?.mmr || player.mmr
+                          ).replace("text-", "bg-")}`}
                         ></span>
                         <span>{player.name}</span>
                         <div className="ml-2 flex flex-wrap gap-1">

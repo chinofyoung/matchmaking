@@ -7,7 +7,9 @@ import { getRecentMatchResults } from "@/firebase/matchService";
 import { TeamComposition, MatchResult } from "@/app/types";
 
 export default function MatchesPage() {
-  const [teamCompositions, setTeamCompositions] = useState<TeamComposition[]>([]);
+  const [teamCompositions, setTeamCompositions] = useState<TeamComposition[]>(
+    []
+  );
   const [matchResults, setMatchResults] = useState<MatchResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,18 +38,22 @@ export default function MatchesPage() {
   }, []);
 
   // Find match result for a team composition
-  const findMatchResult = (teamCompositionId: string | undefined): MatchResult | undefined => {
+  const findMatchResult = (
+    teamCompositionId: string | undefined
+  ): MatchResult | undefined => {
     if (!teamCompositionId) return undefined;
-    return matchResults.find(match => match.teamCompositionId === teamCompositionId);
+    return matchResults.find(
+      (match) => match.teamCompositionId === teamCompositionId
+    );
   };
 
   // Group team compositions by completed/pending matches
-  const completedMatches = teamCompositions.filter(comp => 
-    comp.id && findMatchResult(comp.id)
+  const completedMatches = teamCompositions.filter(
+    (comp) => comp.id && findMatchResult(comp.id)
   );
-  
-  const pendingMatches = teamCompositions.filter(comp => 
-    comp.id && !findMatchResult(comp.id)
+
+  const pendingMatches = teamCompositions.filter(
+    (comp) => comp.id && !findMatchResult(comp.id)
   );
 
   return (
@@ -56,7 +62,7 @@ export default function MatchesPage() {
         <h1 className="text-3xl font-bold text-center mb-4 text-blue-700 dark:text-blue-400">
           Match Management
         </h1>
-        <p className="text-center text-gray-600 dark:text-gray-400">
+        <p className="text-center text-gray-700 dark:text-gray-300">
           View match history and record results for pending matches
         </p>
       </section>
@@ -75,7 +81,7 @@ export default function MatchesPage() {
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
         </div>
       ) : error ? (
-        <div className="p-4 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-md text-center">
+        <div className="p-4 bg-red-50 dark:bg-red-900/40 text-red-700 dark:text-red-300 rounded-md text-center">
           {error}{" "}
           <button
             onClick={() => window.location.reload()}
@@ -91,9 +97,9 @@ export default function MatchesPage() {
             <h2 className="text-xl font-semibold mb-4 text-purple-600 dark:text-purple-400">
               Pending Matches ({pendingMatches.length})
             </h2>
-            
+
             {pendingMatches.length === 0 ? (
-              <p className="text-center text-gray-500 dark:text-gray-400 my-4">
+              <p className="text-center text-gray-700 dark:text-gray-300 my-4">
                 No pending matches. All match results have been recorded.
               </p>
             ) : (
@@ -108,30 +114,35 @@ export default function MatchesPage() {
                   </thead>
                   <tbody>
                     {pendingMatches.map((match) => (
-                      <tr key={match.id} className="border-b dark:border-gray-700">
+                      <tr
+                        key={match.id}
+                        className="border-b dark:border-gray-700"
+                      >
                         <td className="py-2 px-4">
                           {new Date(match.date).toLocaleDateString()}
                         </td>
                         <td className="py-2 px-4">
                           <div className="flex space-x-1 items-center">
-                            <span className="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 text-xs px-2 py-1 rounded-full">
+                            <span className="bg-red-100 dark:bg-red-900/40 text-red-900 dark:text-red-100 text-xs px-2 py-1 rounded-full">
                               Team 1: {match.team1.length} players
                             </span>
-                            <span className="text-gray-500">vs</span>
-                            <span className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200 text-xs px-2 py-1 rounded-full">
+                            <span className="text-gray-600 dark:text-gray-300">
+                              vs
+                            </span>
+                            <span className="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-900 dark:text-indigo-100 text-xs px-2 py-1 rounded-full">
                               Team 2: {match.team2.length} players
                             </span>
                           </div>
                         </td>
                         <td className="py-2 px-4 text-right">
                           <div className="flex justify-end space-x-2">
-                            <Link 
+                            <Link
                               href={`/matches/${match.id}`}
                               className="text-blue-500 hover:text-blue-700"
                             >
                               View
                             </Link>
-                            <Link 
+                            <Link
                               href={`/matches/record?teamId=${match.id}`}
                               className="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded-md transition-colors"
                             >
@@ -152,9 +163,9 @@ export default function MatchesPage() {
             <h2 className="text-xl font-semibold mb-4 text-blue-600 dark:text-blue-400">
               Match History ({completedMatches.length})
             </h2>
-            
+
             {completedMatches.length === 0 ? (
-              <p className="text-center text-gray-500 dark:text-gray-400 my-4">
+              <p className="text-center text-gray-700 dark:text-gray-300 my-4">
                 No match history yet. Record your first match result.
               </p>
             ) : (
@@ -172,18 +183,26 @@ export default function MatchesPage() {
                     {completedMatches.map((match) => {
                       const matchResult = findMatchResult(match.id);
                       return (
-                        <tr key={match.id} className="border-b dark:border-gray-700">
+                        <tr
+                          key={match.id}
+                          className="border-b dark:border-gray-700"
+                        >
                           <td className="py-2 px-4">
                             {new Date(match.date).toLocaleDateString()}
                           </td>
                           <td className="py-2 px-4">
                             {matchResult && (
-                              <span className={`text-xs px-2 py-1 rounded-full ${
-                                matchResult.winningTeam === 'team1'
-                                  ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200"
-                                  : "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200"
-                              }`}>
-                                Team {matchResult.winningTeam === 'team1' ? '1' : '2'}
+                              <span
+                                className={`text-xs px-2 py-1 rounded-full ${
+                                  matchResult.winningTeam === "team1"
+                                    ? "bg-red-100 dark:bg-red-900/40 text-red-900 dark:text-red-100"
+                                    : "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-900 dark:text-indigo-100"
+                                }`}
+                              >
+                                Team{" "}
+                                {matchResult.winningTeam === "team1"
+                                  ? "1"
+                                  : "2"}
                               </span>
                             )}
                           </td>
@@ -191,7 +210,7 @@ export default function MatchesPage() {
                             {matchResult?.scoreSummary || "No summary"}
                           </td>
                           <td className="py-2 px-4 text-right">
-                            <Link 
+                            <Link
                               href={`/matches/${match.id}`}
                               className="text-blue-500 hover:text-blue-700"
                             >

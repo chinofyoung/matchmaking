@@ -5,6 +5,12 @@ import { useRouter } from "next/navigation";
 import { getTeamCompositionById } from "@/firebase/playerService";
 import { getMatchResultForTeamComposition } from "@/firebase/matchService";
 import { TeamComposition, MatchResult, Role } from "@/app/types";
+import {
+  getMmrTierName,
+  getMmrTierColor,
+  DEFAULT_MMR_VALUES,
+  MmrTier,
+} from "@/firebase/mmrService";
 import Link from "next/link";
 import React from "react";
 
@@ -65,18 +71,39 @@ export default function MatchDetailPage({ params }: { params: PageParams }) {
   const getRoleColor = (role: Role): string => {
     switch (role) {
       case "Roam":
-        return "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200";
+        return "bg-purple-100 dark:bg-purple-900/40 text-purple-900 dark:text-purple-100";
       case "Mid":
-        return "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200";
+        return "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-900 dark:text-yellow-100";
       case "Gold":
-        return "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200";
+        return "bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-100";
       case "Jungle":
-        return "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200";
+        return "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-900 dark:text-emerald-100";
       case "Exp":
-        return "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-200";
+        return "bg-cyan-100 dark:bg-cyan-900/40 text-cyan-900 dark:text-cyan-100";
       default:
-        return "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200";
+        return "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100";
     }
+  };
+
+  // Helper function to get average MMR for a team
+  const getTeamAverageMmr = (players: any[]) => {
+    if (!players || players.length === 0) return 0;
+    const totalMmr = players.reduce((sum, player) => {
+      const playerMmr = player.stats?.mmr || player.mmr;
+      return sum + playerMmr;
+    }, 0);
+    return Math.round(totalMmr / players.length);
+  };
+
+  // Helper function to group players by tier
+  const getPlayersByTier = (players: any[]) => {
+    const tiers: Record<string, number> = {};
+    players.forEach((player) => {
+      const playerMmr = player.stats?.mmr || player.mmr;
+      const tier = getMmrTierName(playerMmr);
+      tiers[tier] = (tiers[tier] || 0) + 1;
+    });
+    return Object.entries(tiers);
   };
 
   return (
@@ -100,7 +127,7 @@ export default function MatchDetailPage({ params }: { params: PageParams }) {
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
         </div>
       ) : error ? (
-        <div className="p-4 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-md text-center">
+        <div className="p-4 bg-red-50 dark:bg-red-900/40 text-red-700 dark:text-red-300 rounded-md text-center">
           {error}{" "}
           <Link href="/matches" className="underline ml-2">
             Back to Matches
@@ -116,21 +143,21 @@ export default function MatchDetailPage({ params }: { params: PageParams }) {
                     Match on{" "}
                     {new Date(teamComposition.date).toLocaleDateString()}
                   </h2>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
                     {new Date(teamComposition.date).toLocaleTimeString()}
                   </p>
                 </div>
 
                 {matchResult ? (
                   <div className="flex items-center">
-                    <span className="mr-2 text-sm text-gray-600 dark:text-gray-400">
+                    <span className="mr-2 text-sm text-gray-700 dark:text-gray-300">
                       Winner:
                     </span>
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-medium ${
                         matchResult.winningTeam === "team1"
-                          ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200"
-                          : "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200"
+                          ? "bg-red-100 dark:bg-red-900/40 text-red-900 dark:text-red-100"
+                          : "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-900 dark:text-indigo-100"
                       }`}
                     >
                       Team {matchResult.winningTeam === "team1" ? "1" : "2"}
@@ -147,23 +174,23 @@ export default function MatchDetailPage({ params }: { params: PageParams }) {
               </div>
 
               {matchResult && (
-                <div className="mb-6 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-md">
+                <div className="mb-6 bg-slate-700 dark:bg-gray-850 p-4 rounded-md">
                   {matchResult.scoreSummary && (
                     <div className="mb-2">
-                      <span className="font-medium text-gray-700 dark:text-gray-300">
+                      <span className="font-medium text-gray-800 dark:text-gray-200">
                         Score:
                       </span>{" "}
-                      <span className="text-gray-600 dark:text-gray-400">
+                      <span className="text-gray-700 dark:text-gray-300">
                         {matchResult.scoreSummary}
                       </span>
                     </div>
                   )}
                   {matchResult.notes && (
                     <div>
-                      <span className="font-medium text-gray-700 dark:text-gray-300">
+                      <span className="font-medium text-gray-800 dark:text-gray-200">
                         Notes:
                       </span>{" "}
-                      <span className="text-gray-600 dark:text-gray-400">
+                      <span className="text-gray-700 dark:text-gray-300">
                         {matchResult.notes}
                       </span>
                     </div>
@@ -183,90 +210,67 @@ export default function MatchDetailPage({ params }: { params: PageParams }) {
                   <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-3">
                     Team 1
                     {matchResult?.winningTeam === "team1" && (
-                      <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">
+                      <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/40 text-green-900 dark:text-green-100">
                         Winner
                       </span>
                     )}
                   </h3>
 
                   <div className="mb-3 flex flex-wrap gap-2">
-                    <span className="text-xs bg-blue-100 dark:bg-blue-900/50 px-2 py-1 rounded-full">
-                      {
-                        teamComposition.team1.filter(
-                          (p) => p.category === "Expert"
-                        ).length
-                      }{" "}
-                      experts
-                    </span>
-                    <span className="text-xs bg-orange-100 dark:bg-orange-900/50 px-2 py-1 rounded-full">
-                      {
-                        teamComposition.team1.filter(
-                          (p) => p.category === "Intermediate"
-                        ).length
-                      }{" "}
-                      intermediates
-                    </span>
-                    <span className="text-xs bg-green-100 dark:bg-green-900/50 px-2 py-1 rounded-full">
-                      {
-                        teamComposition.team1.filter(
-                          (p) => p.category === "Beginner"
-                        ).length
-                      }{" "}
-                      beginners
-                    </span>
+                    {getPlayersByTier(teamComposition.team1).map(
+                      ([tier, count]) => (
+                        <span
+                          key={tier}
+                          className={`text-xs px-2 py-1 rounded-full ${getMmrTierColor(
+                            parseInt(tier) || 1200
+                          )}`}
+                        >
+                          {count} {tier}
+                        </span>
+                      )
+                    )}
                   </div>
 
                   <ul className="space-y-2">
-                    {teamComposition.team1.map((player, index) => (
-                      <li
-                        key={index}
-                        className={`p-3 rounded flex flex-col ${
-                          player.category === "Expert"
-                            ? "bg-blue-50 dark:bg-blue-900/30"
-                            : player.category === "Intermediate"
-                            ? "bg-orange-50 dark:bg-orange-900/30"
-                            : "bg-green-50 dark:bg-green-900/30"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center">
-                            <span
-                              className={`w-2 h-2 rounded-full mr-2 ${
-                                player.category === "Expert"
-                                  ? "bg-blue-500"
-                                  : player.category === "Intermediate"
-                                  ? "bg-orange-500"
-                                  : "bg-green-500"
-                              }`}
-                            ></span>
-                            <span className="font-medium">{player.name}</span>
-                            <span
-                              className={`ml-2 text-xs px-2 py-0.5 rounded ${
-                                player.category === "Expert"
-                                  ? "bg-blue-200 dark:bg-blue-800"
-                                  : player.category === "Intermediate"
-                                  ? "bg-orange-200 dark:bg-orange-800"
-                                  : "bg-green-200 dark:bg-green-800"
-                              }`}
-                            >
-                              {player.category}
-                            </span>
+                    {teamComposition.team1.map((player, index) => {
+                      const playerMmr = player.stats?.mmr || player.mmr;
+                      return (
+                        <li
+                          key={index}
+                          className="p-3 rounded flex flex-col bg-slate-700 dark:bg-gray-850"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center">
+                              <span
+                                className={`w-2 h-2 rounded-full mr-2 ${getMmrTierColor(
+                                  playerMmr
+                                ).replace("text-", "bg-")}`}
+                              ></span>
+                              <span className="font-medium">{player.name}</span>
+                              <span
+                                className={`ml-2 text-xs px-2 py-0.5 rounded ${getMmrTierColor(
+                                  playerMmr
+                                )}`}
+                              >
+                                {getMmrTierName(playerMmr)}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {player.roles.map((role) => (
-                            <span
-                              key={role}
-                              className={`text-xs px-2 py-0.5 rounded-full ${getRoleColor(
-                                role
-                              )}`}
-                            >
-                              {role}
-                            </span>
-                          ))}
-                        </div>
-                      </li>
-                    ))}
+                          <div className="flex flex-wrap gap-1">
+                            {player.roles.map((role) => (
+                              <span
+                                key={role}
+                                className={`text-xs px-2 py-0.5 rounded-full ${getRoleColor(
+                                  role
+                                )}`}
+                              >
+                                {role}
+                              </span>
+                            ))}
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
 
@@ -280,90 +284,67 @@ export default function MatchDetailPage({ params }: { params: PageParams }) {
                   <h3 className="text-lg font-semibold text-indigo-600 dark:text-indigo-400 mb-3">
                     Team 2
                     {matchResult?.winningTeam === "team2" && (
-                      <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">
+                      <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/40 text-green-900 dark:text-green-100">
                         Winner
                       </span>
                     )}
                   </h3>
 
                   <div className="mb-3 flex flex-wrap gap-2">
-                    <span className="text-xs bg-blue-100 dark:bg-blue-900/50 px-2 py-1 rounded-full">
-                      {
-                        teamComposition.team2.filter(
-                          (p) => p.category === "Expert"
-                        ).length
-                      }{" "}
-                      experts
-                    </span>
-                    <span className="text-xs bg-orange-100 dark:bg-orange-900/50 px-2 py-1 rounded-full">
-                      {
-                        teamComposition.team2.filter(
-                          (p) => p.category === "Intermediate"
-                        ).length
-                      }{" "}
-                      intermediates
-                    </span>
-                    <span className="text-xs bg-green-100 dark:bg-green-900/50 px-2 py-1 rounded-full">
-                      {
-                        teamComposition.team2.filter(
-                          (p) => p.category === "Beginner"
-                        ).length
-                      }{" "}
-                      beginners
-                    </span>
+                    {getPlayersByTier(teamComposition.team2).map(
+                      ([tier, count]) => (
+                        <span
+                          key={tier}
+                          className={`text-xs px-2 py-1 rounded-full ${getMmrTierColor(
+                            parseInt(tier) || 1200
+                          )}`}
+                        >
+                          {count} {tier}
+                        </span>
+                      )
+                    )}
                   </div>
 
                   <ul className="space-y-2">
-                    {teamComposition.team2.map((player, index) => (
-                      <li
-                        key={index}
-                        className={`p-3 rounded flex flex-col ${
-                          player.category === "Expert"
-                            ? "bg-blue-50 dark:bg-blue-900/30"
-                            : player.category === "Intermediate"
-                            ? "bg-orange-50 dark:bg-orange-900/30"
-                            : "bg-green-50 dark:bg-green-900/30"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center">
-                            <span
-                              className={`w-2 h-2 rounded-full mr-2 ${
-                                player.category === "Expert"
-                                  ? "bg-blue-500"
-                                  : player.category === "Intermediate"
-                                  ? "bg-orange-500"
-                                  : "bg-green-500"
-                              }`}
-                            ></span>
-                            <span className="font-medium">{player.name}</span>
-                            <span
-                              className={`ml-2 text-xs px-2 py-0.5 rounded ${
-                                player.category === "Expert"
-                                  ? "bg-blue-200 dark:bg-blue-800"
-                                  : player.category === "Intermediate"
-                                  ? "bg-orange-200 dark:bg-orange-800"
-                                  : "bg-green-200 dark:bg-green-800"
-                              }`}
-                            >
-                              {player.category}
-                            </span>
+                    {teamComposition.team2.map((player, index) => {
+                      const playerMmr = player.stats?.mmr || player.mmr;
+                      return (
+                        <li
+                          key={index}
+                          className="p-3 rounded flex flex-col bg-slate-700 dark:bg-gray-850"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center">
+                              <span
+                                className={`w-2 h-2 rounded-full mr-2 ${getMmrTierColor(
+                                  playerMmr
+                                ).replace("text-", "bg-")}`}
+                              ></span>
+                              <span className="font-medium">{player.name}</span>
+                              <span
+                                className={`ml-2 text-xs px-2 py-0.5 rounded ${getMmrTierColor(
+                                  playerMmr
+                                )}`}
+                              >
+                                {getMmrTierName(playerMmr)}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {player.roles.map((role) => (
-                            <span
-                              key={role}
-                              className={`text-xs px-2 py-0.5 rounded-full ${getRoleColor(
-                                role
-                              )}`}
-                            >
-                              {role}
-                            </span>
-                          ))}
-                        </div>
-                      </li>
-                    ))}
+                          <div className="flex flex-wrap gap-1">
+                            {player.roles.map((role) => (
+                              <span
+                                key={role}
+                                className={`text-xs px-2 py-0.5 rounded-full ${getRoleColor(
+                                  role
+                                )}`}
+                              >
+                                {role}
+                              </span>
+                            ))}
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               </div>

@@ -4,17 +4,37 @@ import { db } from "./config";
 
 // Constants for MMR calculation
 const K_FACTOR = 32; // How much MMR can change in a single match
-const DEFAULT_MMR = {
-  Expert: 1500, // Starting MMR for Expert players
-  Intermediate: 1200, // Starting MMR for Intermediate players
-  Beginner: 1000, // Starting MMR for Beginner players
+
+// Default MMR values for each tier
+export type MmrTier =
+  | "Bubu"
+  | "SemiBubu"
+  | "MaaramGuti"
+  | "Maaram"
+  | "DiriMakarit"
+  | "Makarit"
+  | "MakaritKaritan"
+  | "PinakaMakarit";
+
+export const DEFAULT_MMR_VALUES: Record<MmrTier, number> = {
+  Bubu: 900,
+  SemiBubu: 1000,
+  MaaramGuti: 1200,
+  Maaram: 1400,
+  DiriMakarit: 1600,
+  Makarit: 1800,
+  MakaritKaritan: 2000,
+  PinakaMakarit: 2200,
 };
 
-// Initialize MMR for a new player based on their category
-export const getInitialMmr = (
-  category: "Expert" | "Intermediate" | "Beginner"
-): number => {
-  return DEFAULT_MMR[category];
+// Get default MMR value for a new player
+export const getMmrDefaultValue = (tier: MmrTier = "SemiBubu"): number => {
+  return DEFAULT_MMR_VALUES[tier];
+};
+
+// Initialize MMR for a new player based on their selected tier
+export const getInitialMmr = (tier: MmrTier = "SemiBubu"): number => {
+  return getMmrDefaultValue(tier);
 };
 
 // Calculate probability of winning based on MMR difference
@@ -41,9 +61,9 @@ export const calculateNewMmr = (
 export const calculateTeamAverageMmr = (players: Player[]): number => {
   if (players.length === 0) return 0;
 
-  // Sum up all player MMRs, using their stats.mmr if available, or default to initial value based on category
+  // Sum up all player MMRs
   const totalMmr = players.reduce((sum, player) => {
-    const playerMmr = player.stats?.mmr || getInitialMmr(player.category);
+    const playerMmr = player.stats?.mmr || player.mmr;
     return sum + playerMmr;
   }, 0);
 
@@ -94,7 +114,7 @@ export const calculateMatchMmrChanges = (
 
   // Update MMR for team 1 players
   const updatedTeam1 = team1.map((player) => {
-    const currentMmr = player.stats?.mmr || getInitialMmr(player.category);
+    const currentMmr = player.stats?.mmr || player.mmr;
     const newMmr = calculateNewMmr(currentMmr, team2AvgMmr, team1Won);
     const mmrChange = newMmr - currentMmr;
 
@@ -105,7 +125,7 @@ export const calculateMatchMmrChanges = (
       wins: 0,
       losses: 0,
       matchesPlayed: 0,
-      mmr: getInitialMmr(player.category),
+      mmr: player.mmr,
       winRate: 0,
     };
 
@@ -121,7 +141,7 @@ export const calculateMatchMmrChanges = (
 
   // Update MMR for team 2 players
   const updatedTeam2 = team2.map((player) => {
-    const currentMmr = player.stats?.mmr || getInitialMmr(player.category);
+    const currentMmr = player.stats?.mmr || player.mmr;
     const newMmr = calculateNewMmr(currentMmr, team1AvgMmr, team2Won);
     const mmrChange = newMmr - currentMmr;
 
@@ -132,7 +152,7 @@ export const calculateMatchMmrChanges = (
       wins: 0,
       losses: 0,
       matchesPlayed: 0,
-      mmr: getInitialMmr(player.category),
+      mmr: player.mmr,
       winRate: 0,
     };
 
@@ -156,24 +176,24 @@ export const calculateMatchMmrChanges = (
 
 // Helper function to get MMR tier name based on MMR value
 export const getMmrTierName = (mmr: number): string => {
-  if (mmr >= 2200) return "Mythical Glory";
-  if (mmr >= 2000) return "Mythic";
-  if (mmr >= 1800) return "Legend";
-  if (mmr >= 1600) return "Epic";
-  if (mmr >= 1400) return "Grandmaster";
-  if (mmr >= 1200) return "Master";
-  if (mmr >= 1000) return "Elite";
-  return "Rookie";
+  if (mmr >= 2200) return "PinakaMakarit";
+  if (mmr >= 2000) return "MakaritKaritan";
+  if (mmr >= 1800) return "Makarit";
+  if (mmr >= 1600) return "DiriMakarit";
+  if (mmr >= 1400) return "Maaram";
+  if (mmr >= 1200) return "MaaramGuti";
+  if (mmr >= 1000) return "SemiBubu";
+  return "Bubu";
 };
 
 // Get color class for MMR tier
 export const getMmrTierColor = (mmr: number): string => {
-  if (mmr >= 2200) return "text-purple-600 dark:text-purple-400";
-  if (mmr >= 2000) return "text-pink-600 dark:text-pink-400";
-  if (mmr >= 1800) return "text-yellow-600 dark:text-yellow-400";
-  if (mmr >= 1600) return "text-orange-600 dark:text-orange-400";
-  if (mmr >= 1400) return "text-teal-600 dark:text-teal-400";
-  if (mmr >= 1200) return "text-blue-600 dark:text-blue-400";
-  if (mmr >= 1000) return "text-green-600 dark:text-green-400";
-  return "text-gray-600 dark:text-gray-400";
+  if (mmr >= 2200) return "text-purple-800 dark:text-purple-300 font-semibold";
+  if (mmr >= 2000) return "text-pink-800 dark:text-pink-300 font-semibold";
+  if (mmr >= 1800) return "text-yellow-800 dark:text-yellow-300 font-semibold";
+  if (mmr >= 1600) return "text-orange-800 dark:text-orange-300 font-semibold";
+  if (mmr >= 1400) return "text-teal-800 dark:text-teal-300 font-semibold";
+  if (mmr >= 1200) return "text-blue-800 dark:text-blue-300 font-semibold";
+  if (mmr >= 1000) return "text-green-800 dark:text-green-300 font-semibold";
+  return "text-gray-800 dark:text-gray-300 font-semibold";
 };

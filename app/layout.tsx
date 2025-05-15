@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ML Team Manager",
+  title: "GAP Makarits",
   description: "Team management app for ML players and matches",
 };
 
@@ -37,31 +37,31 @@ export default function RootLayout({
                     href="/"
                     className="text-xl font-bold text-blue-600 dark:text-blue-400"
                   >
-                    ML Team Manager
+                    GAP Makarits
                   </Link>
                 </div>
                 <nav className="ml-6 flex space-x-4 sm:space-x-8">
                   <Link
                     href="/players"
-                    className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-600"
+                    className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-600"
                   >
                     Players
                   </Link>
                   <Link
                     href="/teams"
-                    className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-600"
+                    className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-600"
                   >
                     Teams
                   </Link>
                   <Link
                     href="/matches"
-                    className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-600"
+                    className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-600"
                   >
                     Matches
                   </Link>
                   <Link
                     href="/stats"
-                    className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-600"
+                    className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-600"
                   >
                     Statistics
                   </Link>
@@ -75,8 +75,8 @@ export default function RootLayout({
         </main>
         <footer className="bg-white dark:bg-gray-800 shadow-inner mt-auto py-4">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <p className="text-center text-sm text-gray-500 dark:text-gray-400">
-              ML Team Manager &copy; {new Date().getFullYear()}
+            <p className="text-center text-sm text-gray-700 dark:text-gray-300">
+              GAP Makarits &copy; {new Date().getFullYear()}
             </p>
           </div>
         </footer>

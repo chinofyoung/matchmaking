@@ -2,15 +2,14 @@
 // Define player role types
 export type Role = "Roam" | "Mid" | "Gold" | "Jungle" | "Exp";
 
-// Define player type with name, category, and roles
+// Define player type with name, roles, and MMR
 export interface Player {
   id?: string;
   name: string;
-  category: "Expert" | "Intermediate" | "Beginner";
   roles: Role[];
   isSelected?: boolean;
   stats?: PlayerStats;
-  mmr?: number; // ELO rating
+  mmr: number; // ELO rating (required)
 }
 
 // Player statistics tracking

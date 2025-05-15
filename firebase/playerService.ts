@@ -14,7 +14,7 @@ import {
 } from "firebase/firestore";
 import { db } from "./config";
 import { Player, TeamComposition } from "@/app/types";
-import { getInitialMmr, calculateTeamAverageMmr } from "./mmrService";
+import { calculateTeamAverageMmr } from "./mmrService";
 
 // Reference to players collection
 const playersCollection = collection(db, "players");
@@ -25,9 +25,7 @@ const teamCompositionsCollection = collection(db, "teamCompositions");
 // Add a new player to Firestore
 export const addPlayerToFirestore = async (player: Player): Promise<string> => {
   try {
-    // Initialize stats for new players with default MMR based on category
-    const initialMmr = getInitialMmr(player.category);
-
+    // Initialize stats for new players
     const playerWithStats = {
       ...player,
       stats: {
@@ -35,7 +33,7 @@ export const addPlayerToFirestore = async (player: Player): Promise<string> => {
         losses: 0,
         matchesPlayed: 0,
         winRate: 0,
-        mmr: initialMmr,
+        mmr: player.mmr, // Use the provided MMR value
       },
     };
 
@@ -106,11 +104,11 @@ export const updatePlayerInFirestore = async (
   try {
     const playerRef = doc(db, "players", playerId);
 
-    // If category changed, update MMR based on the new category
-    if (updatedPlayer.category && updatedPlayer.stats) {
+    // Check if we need to update MMR in the stats as well
+    if (updatedPlayer.mmr !== undefined && updatedPlayer.stats) {
       // Only update if MMR hasn't been set by matches already
       if (updatedPlayer.stats.matchesPlayed === 0) {
-        updatedPlayer.stats.mmr = getInitialMmr(updatedPlayer.category);
+        updatedPlayer.stats.mmr = updatedPlayer.mmr;
       }
     }
 

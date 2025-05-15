@@ -185,7 +185,7 @@ export default function StatsPage() {
                   </div>
 
                   {/* Statistics summary */}
-                  <div className="bg-gray-50 dark:bg-gray-900/30 p-3 rounded-lg">
+                  <div className="bg-slate-700 dark:bg-gray-900/30 p-3 rounded-lg">
                     <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Current Selection
                     </h3>
@@ -203,7 +203,7 @@ export default function StatsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
+                      <tr className="bg-slate-700 dark:bg-gray-700 border-b dark:border-gray-600">
                         <th className="py-3 px-4 text-left font-medium">Rank</th>
                         <th className="py-3 px-4 text-left font-medium">Player</th>
                         <th className="py-3 px-4 text-left font-medium">Category</th>
@@ -217,7 +217,7 @@ export default function StatsPage() {
                       {filteredPlayers.map((player, index) => (
                         <tr 
                           key={player.id} 
-                          className={`hover:bg-gray-50 dark:hover:bg-gray-750 ${
+                          className={`hover:bg-slate-700 dark:hover:bg-gray-750 ${
                             index === 0 && filteredPlayers.length > 1 ? "bg-yellow-50 dark:bg-yellow-900/10" : ""
                           }`}
                         >
