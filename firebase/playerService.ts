@@ -3,12 +3,14 @@ import {
   collection,
   addDoc,
   getDocs,
+  getDoc,
   deleteDoc,
   doc,
   updateDoc,
   query,
   orderBy,
   limit,
+  where,
 } from "firebase/firestore";
 import { db } from "./config";
 import { Player, TeamComposition } from "@/app/types";
@@ -22,7 +24,18 @@ const teamCompositionsCollection = collection(db, "teamCompositions");
 // Add a new player to Firestore
 export const addPlayerToFirestore = async (player: Player): Promise<string> => {
   try {
-    const docRef = await addDoc(playersCollection, player);
+    // Initialize stats for new players
+    const playerWithStats = {
+      ...player,
+      stats: {
+        wins: 0,
+        losses: 0,
+        matchesPlayed: 0,
+        winRate: 0,
+      },
+    };
+
+    const docRef = await addDoc(playersCollection, playerWithStats);
     return docRef.id;
   } catch (error) {
     console.error("Error adding player to Firestore:", error);
@@ -43,6 +56,28 @@ export const getPlayersFromFirestore = async (): Promise<Player[]> => {
     );
   } catch (error) {
     console.error("Error getting players from Firestore:", error);
+    throw error;
+  }
+};
+
+// Get a team composition by ID
+export const getTeamCompositionById = async (
+  id: string
+): Promise<TeamComposition | null> => {
+  try {
+    const docRef = doc(teamCompositionsCollection, id);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return {
+        id: docSnap.id,
+        ...docSnap.data(),
+      } as TeamComposition;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error getting team composition by ID:", error);
     throw error;
   }
 };
