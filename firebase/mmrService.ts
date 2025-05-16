@@ -7,33 +7,33 @@ const K_FACTOR = 32; // How much MMR can change in a single match
 
 // Default MMR values for each tier
 export type MmrTier =
-  | "Bubu"
-  | "SemiBubu"
-  | "MaaramGuti"
+  | "Budlot"
+  | "Bulotay"
+  | "Maaramay"
   | "Maaram"
-  | "DiriMakarit"
+  | "Makaritay"
   | "Makarit"
   | "MakaritKaritan"
-  | "PinakaMakarit";
+  | "Gikakariti";
 
 export const DEFAULT_MMR_VALUES: Record<MmrTier, number> = {
-  Bubu: 900,
-  SemiBubu: 1000,
-  MaaramGuti: 1200,
+  Budlot: 900,
+  Bulotay: 1000,
+  Maaramay: 1200,
   Maaram: 1400,
-  DiriMakarit: 1600,
+  Makaritay: 1600,
   Makarit: 1800,
   MakaritKaritan: 2000,
-  PinakaMakarit: 2200,
+  Gikakariti: 2200,
 };
 
 // Get default MMR value for a new player
-export const getMmrDefaultValue = (tier: MmrTier = "SemiBubu"): number => {
+export const getMmrDefaultValue = (tier: MmrTier = "Bulotay"): number => {
   return DEFAULT_MMR_VALUES[tier];
 };
 
 // Initialize MMR for a new player based on their selected tier
-export const getInitialMmr = (tier: MmrTier = "SemiBubu"): number => {
+export const getInitialMmr = (tier: MmrTier = "Bulotay"): number => {
   return getMmrDefaultValue(tier);
 };
 
@@ -176,14 +176,14 @@ export const calculateMatchMmrChanges = (
 
 // Helper function to get MMR tier name based on MMR value
 export const getMmrTierName = (mmr: number): string => {
-  if (mmr >= 2200) return "PinakaMakarit";
+  if (mmr >= 2200) return "Gikakariti";
   if (mmr >= 2000) return "MakaritKaritan";
   if (mmr >= 1800) return "Makarit";
-  if (mmr >= 1600) return "DiriMakarit";
+  if (mmr >= 1600) return "Makaritay";
   if (mmr >= 1400) return "Maaram";
-  if (mmr >= 1200) return "MaaramGuti";
-  if (mmr >= 1000) return "SemiBubu";
-  return "Bubu";
+  if (mmr >= 1200) return "Maaramay";
+  if (mmr >= 1000) return "Bulotay";
+  return "Budlot";
 };
 
 // Get color class for MMR tier

@@ -18,7 +18,7 @@ import {
 export default function PlayersPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [newPlayerName, setNewPlayerName] = useState("");
-  const [newPlayerMmrTier, setNewPlayerMmrTier] = useState<MmrTier>("SemiBubu");
+  const [newPlayerMmrTier, setNewPlayerMmrTier] = useState<MmrTier>("Bulotay");
   const [selectedRoles, setSelectedRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,14 +30,14 @@ export default function PlayersPage() {
 
   // Available MMR tiers
   const availableTiers: MmrTier[] = [
-    "Bubu",
-    "SemiBubu",
-    "MaaramGuti",
+    "Budlot",
+    "Bulotay",
+    "Maaramay",
     "Maaram",
-    "DiriMakarit",
+    "Makaritay",
     "Makarit",
     "MakaritKaritan",
-    "PinakaMakarit",
+    "Gikakariti",
   ];
 
   // Load players from Firestore on component mount
@@ -133,7 +133,7 @@ export default function PlayersPage() {
   const cancelEditing = () => {
     setEditingPlayer(null);
     setNewPlayerName("");
-    setNewPlayerMmrTier("SemiBubu");
+    setNewPlayerMmrTier("Bulotay");
     setSelectedRoles([]);
     setIsEditing(false);
   };
@@ -171,7 +171,7 @@ export default function PlayersPage() {
 
       // Reset form
       setNewPlayerName("");
-      setNewPlayerMmrTier("SemiBubu");
+      setNewPlayerMmrTier("Bulotay");
       setSelectedRoles([]);
       setEditingPlayer(null);
       setIsEditing(false);

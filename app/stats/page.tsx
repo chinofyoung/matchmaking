@@ -107,14 +107,14 @@ export default function StatsPage() {
 
   // Available MMR tiers
   const availableTiers: MmrTier[] = [
-    "Bubu",
-    "SemiBubu",
-    "MaaramGuti",
+    "Budlot",
+    "Bulotay",
+    "Maaramay",
     "Maaram",
-    "DiriMakarit",
+    "Makaritay",
     "Makarit",
     "MakaritKaritan",
-    "PinakaMakarit",
+    "Gikakariti",
   ];
 
   return (
