@@ -11,6 +11,11 @@ import {
   DEFAULT_MMR_VALUES,
 } from "@/firebase/mmrService";
 import { TierIcon } from "@/app/components/TierIcon";
+import {
+  playerToGlicko2,
+  calculateRatingReliability,
+  getMatchesForReliableRating,
+} from "@/firebase/glicko2Service";
 
 export default function StatsPage() {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -71,19 +76,38 @@ export default function StatsPage() {
 
     // Apply sorting
     result.sort((a, b) => {
-      if (sortField === "winRate") {
-        return (b.stats?.winRate || 0) - (a.stats?.winRate || 0);
-      } else if (sortField === "wins") {
-        return (b.stats?.wins || 0) - (a.stats?.wins || 0);
-      } else if (sortField === "matchesPlayed") {
-        return (b.stats?.matchesPlayed || 0) - (a.stats?.matchesPlayed || 0);
-      } else if (sortField === "mmr") {
-        const bMmr = b.stats?.mmr || b.mmr;
-        const aMmr = a.stats?.mmr || a.mmr;
-        return bMmr - aMmr;
-      } else {
-        return (b.stats?.winRate || 0) - (a.stats?.winRate || 0);
-      }
+      // First, sort by reliability status
+      const aGlicko2 = playerToGlicko2(a);
+      const bGlicko2 = playerToGlicko2(b);
+      const aRd = aGlicko2.rd * 173.7178;
+      const bRd = bGlicko2.rd * 173.7178;
+
+      // If one player is calibrating and the other isn't, prioritize the non-calibrating player
+      if (aRd > 100 && bRd <= 100) return 1; // a is calibrating, b is not
+      if (aRd <= 100 && bRd > 100) return -1; // b is calibrating, a is not
+
+      // If both are in the same reliability category, calculate weighted score
+      const getWeightedScore = (player: Player) => {
+        const matchesPlayed = player.stats?.matchesPlayed || 0;
+        const mmr = player.stats?.mmr || player.mmr;
+        const winRate = player.stats?.winRate || 0;
+
+        // For reliable players (7+ matches), prioritize win rate
+        if (matchesPlayed >= 7) {
+          // Win rate is the primary factor (multiplied by 100 to make it more significant)
+          let score = winRate * 100;
+          // Add MMR as a secondary factor (divided by 10 to make it less significant)
+          score += mmr / 10;
+          return score;
+        }
+
+        // For calibrating players, use MMR as primary factor
+        return mmr;
+      };
+
+      const aScore = getWeightedScore(a);
+      const bScore = getWeightedScore(b);
+      return bScore - aScore;
     });
 
     setFilteredPlayers(result);
@@ -350,6 +374,9 @@ export default function StatsPage() {
                           MMR Rating
                         </th>
                         <th className="py-3 px-4 text-center font-medium">
+                          Rating Reliability
+                        </th>
+                        <th className="py-3 px-4 text-center font-medium">
                           Win Rate
                         </th>
                         <th className="py-3 px-4 text-center font-medium">
@@ -363,6 +390,18 @@ export default function StatsPage() {
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                       {filteredPlayers.map((player, index) => {
                         const playerMmr = player.stats?.mmr || player.mmr;
+                        const glicko2Rating = playerToGlicko2(player);
+                        const reliability = calculateRatingReliability(
+                          glicko2Rating.rd
+                        );
+                        const matchesNeeded = getMatchesForReliableRating(
+                          glicko2Rating.rd
+                        );
+                        const rd = glicko2Rating.rd * 173.7178; // Convert back to Glicko-1 RD for display
+
+                        // Calculate confidence-adjusted rank
+                        const isUnreliableRank = rd > 100;
+
                         return (
                           <tr
                             key={player.id}
@@ -374,34 +413,54 @@ export default function StatsPage() {
                           >
                             <td className="py-3 px-4">
                               {index < 3 ? (
-                                <span
-                                  className={`
-                                  inline-flex items-center justify-center w-6 h-6 rounded-full 
-                                  ${
-                                    index === 0
-                                      ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
-                                      : ""
-                                  }
-                                  ${
-                                    index === 1
-                                      ? "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                                      : ""
-                                  }
-                                  ${
-                                    index === 2
-                                      ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
-                                      : ""
-                                  }
-                                `}
-                                >
-                                  {index === 0
-                                    ? "🥇"
-                                    : index === 1
-                                    ? "🥈"
-                                    : "🥉"}
-                                </span>
+                                <div className="flex items-center gap-1">
+                                  <span
+                                    className={`
+                                    inline-flex items-center justify-center w-6 h-6 rounded-full 
+                                    ${
+                                      index === 0
+                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                                        : ""
+                                    }
+                                    ${
+                                      index === 1
+                                        ? "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                                        : ""
+                                    }
+                                    ${
+                                      index === 2
+                                        ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
+                                        : ""
+                                    }
+                                  `}
+                                  >
+                                    {index === 0
+                                      ? "🥇"
+                                      : index === 1
+                                      ? "🥈"
+                                      : "🥉"}
+                                  </span>
+                                  {isUnreliableRank && (
+                                    <span
+                                      className="text-xs text-blue-500 dark:text-blue-400"
+                                      title="Ranking may change as more matches are played"
+                                    >
+                                      ⚠️
+                                    </span>
+                                  )}
+                                </div>
                               ) : (
-                                <span className="px-2">{index + 1}</span>
+                                <div className="flex items-center gap-1">
+                                  <span className="px-2">{index + 1}</span>
+                                  {isUnreliableRank && (
+                                    <span
+                                      className="text-xs text-blue-500 dark:text-blue-400"
+                                      title="Ranking may change as more matches are played"
+                                    >
+                                      ⚠️
+                                    </span>
+                                  )}
+                                </div>
                               )}
                             </td>
                             <td className="py-3 px-4 font-medium">
@@ -416,7 +475,7 @@ export default function StatsPage() {
                                 <TierIcon
                                   tier={getMmrTierName(playerMmr) as MmrTier}
                                 />
-                                {playerMmr} MMR - {getMmrTierName(playerMmr)}
+                                {getMmrTierName(playerMmr)}
                               </span>
                             </td>
                             <td className="py-3 px-4">
@@ -437,6 +496,36 @@ export default function StatsPage() {
                               <div>
                                 <span className={getMmrTierColor(playerMmr)}>
                                   {playerMmr}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              <div className="flex flex-col items-center">
+                                <div className="w-24 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full ${
+                                      rd <= 100
+                                        ? (player.stats?.matchesPlayed || 0) >=
+                                          7
+                                          ? "bg-green-500"
+                                          : "bg-yellow-500"
+                                        : "bg-blue-500"
+                                    }`}
+                                    style={{
+                                      width: `${Math.min(
+                                        100,
+                                        (player.stats?.matchesPlayed || 0) *
+                                          (100 / 7)
+                                      )}%`,
+                                    }}
+                                  />
+                                </div>
+                                <span className="text-xs mt-1">
+                                  {rd > 100
+                                    ? "Calibrating"
+                                    : (player.stats?.matchesPlayed || 0) >= 7
+                                    ? "Reliable"
+                                    : "Moderate"}
                                 </span>
                               </div>
                             </td>
