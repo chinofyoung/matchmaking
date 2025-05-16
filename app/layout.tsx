@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GAP Makarits",
+  title: "GAPLaban",
   description: "Team management app for ML players and matches",
 };
 
@@ -37,7 +37,7 @@ export default function RootLayout({
                     href="/"
                     className="text-xl font-bold text-blue-600 dark:text-blue-400"
                   >
-                    GAP Makarits
+                    GAPLaban
                   </Link>
                 </div>
                 <nav className="ml-6 flex space-x-4 sm:space-x-8">
@@ -76,7 +76,7 @@ export default function RootLayout({
         <footer className="bg-white dark:bg-gray-800 shadow-inner mt-auto py-4">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <p className="text-center text-sm text-gray-700 dark:text-gray-300">
-              GAP Makarits &copy; {new Date().getFullYear()}
+              GAPLaban &copy; {new Date().getFullYear()}
             </p>
           </div>
         </footer>

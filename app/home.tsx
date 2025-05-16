@@ -48,7 +48,7 @@ export default function HomePage() {
     <div>
       <section className="mb-10">
         <h1 className="text-3xl md:text-4xl font-bold text-center mb-4 text-blue-700 dark:text-blue-400">
-          GAP Makarits
+          GAPLaban
         </h1>
         <p className="text-center text-gray-700 dark:text-gray-300 mb-8">
           Manage your players, create balanced teams, and track match statistics
