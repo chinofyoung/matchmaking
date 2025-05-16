@@ -419,13 +419,20 @@ export default function PlayersPage() {
                       <div>
                         <span
                           className={`text-xs px-2 py-1 rounded-full ${getMmrTierColor(
-                            player.mmr
+                            player.stats?.mmr || player.mmr
                           )}`}
                         >
                           <TierIcon
-                            tier={getMmrTierName(player.mmr) as MmrTier}
+                            tier={
+                              getMmrTierName(
+                                player.stats?.mmr || player.mmr
+                              ) as MmrTier
+                            }
                           />
-                          {player.mmr} MMR - {getMmrTierName(player.mmr)}
+                          {getMmrTierName(player.stats?.mmr || player.mmr)}
+                        </span>
+                        <span className="ml-2 text-gray-600 dark:text-gray-400">
+                          {player.stats?.mmr || player.mmr} MMR
                         </span>
                       </div>
                     </td>
