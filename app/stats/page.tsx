@@ -11,6 +11,297 @@ import {
   DEFAULT_MMR_VALUES,
 } from "@/firebase/mmrService";
 
+// Function to get tier icons
+const getTierIcon = (tier: MmrTier): React.ReactElement => {
+  switch (tier) {
+    case "Budlot":
+      return (
+        <svg
+          className="w-4 h-4 inline-block mr-1"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+          />
+        </svg>
+      );
+    case "Budlotay":
+      return (
+        <svg
+          className="w-4 h-4 inline-block mr-1"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2v20"
+          />
+        </svg>
+      );
+    case "Maaramay":
+      return (
+        <svg
+          className="w-4 h-4 inline-block mr-1"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2v20"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M2 12h20"
+          />
+        </svg>
+      );
+    case "Maaram":
+      return (
+        <svg
+          className="w-4 h-4 inline-block mr-1"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2v20"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M2 12h20"
+          />
+          <circle cx="12" cy="12" r="2" strokeWidth={2} />
+        </svg>
+      );
+    case "Makaritay":
+      return (
+        <svg
+          className="w-4 h-4 inline-block mr-1"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2v20"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M2 12h20"
+          />
+          <circle cx="12" cy="12" r="2" strokeWidth={2} />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2l4 4-4 4-4-4 4-4z"
+          />
+        </svg>
+      );
+    case "Makarit":
+      return (
+        <svg
+          className="w-4 h-4 inline-block mr-1"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2v20"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M2 12h20"
+          />
+          <circle cx="12" cy="12" r="2" strokeWidth={2} />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2l4 4-4 4-4-4 4-4z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 18l4-4-4-4-4 4 4 4z"
+          />
+        </svg>
+      );
+    case "MakaritKaritan":
+      return (
+        <svg
+          className="w-4 h-4 inline-block mr-1"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2v20"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M2 12h20"
+          />
+          <circle cx="12" cy="12" r="2" strokeWidth={2} />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2l4 4-4 4-4-4 4-4z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 18l4-4-4-4-4 4 4 4z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M2 12l4-4 4 4-4 4-4-4z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M18 12l4-4 4 4-4 4-4-4z"
+          />
+        </svg>
+      );
+    case "Gikakariti":
+      return (
+        <svg
+          className="w-4 h-4 inline-block mr-1"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2v20"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M2 12h20"
+          />
+          <circle cx="12" cy="12" r="2" strokeWidth={2} />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2l4 4-4 4-4-4 4-4z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 18l4-4-4-4-4 4 4 4z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M2 12l4-4 4 4-4 4-4-4z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M18 12l4-4 4 4-4 4-4-4z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 2l8 8-8 8-8-8 8-8z"
+          />
+        </svg>
+      );
+    default:
+      return <></>;
+  }
+};
+
 export default function StatsPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
@@ -108,7 +399,7 @@ export default function StatsPage() {
   // Available MMR tiers
   const availableTiers: MmrTier[] = [
     "Budlot",
-    "Bulotay",
+    "Budlotay",
     "Maaramay",
     "Maaram",
     "Makaritay",
@@ -170,7 +461,7 @@ export default function StatsPage() {
                       <option value="all">All Tiers</option>
                       {availableTiers.map((tier) => (
                         <option key={tier} value={tier}>
-                          {tier}
+                          {getTierIcon(tier as MmrTier)} {tier}
                         </option>
                       ))}
                     </select>
@@ -341,6 +632,9 @@ export default function StatsPage() {
                                   playerMmr
                                 )}`}
                               >
+                                {getTierIcon(
+                                  getMmrTierName(playerMmr) as MmrTier
+                                )}
                                 {getMmrTierName(playerMmr)}
                               </span>
                             </td>

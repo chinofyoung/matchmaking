@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, ReactElement } from "react";
 import {
   addPlayerToFirestore,
   getPlayersFromFirestore,
@@ -18,12 +18,13 @@ import {
 export default function PlayersPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [newPlayerName, setNewPlayerName] = useState("");
-  const [newPlayerMmrTier, setNewPlayerMmrTier] = useState<MmrTier>("Bulotay");
+  const [newPlayerMmrTier, setNewPlayerMmrTier] = useState<MmrTier>("Budlotay");
   const [selectedRoles, setSelectedRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isTierDropdownOpen, setIsTierDropdownOpen] = useState(false);
 
   // Available roles
   const availableRoles: Role[] = ["Roam", "Mid", "Gold", "Jungle", "Exp"];
@@ -31,7 +32,7 @@ export default function PlayersPage() {
   // Available MMR tiers
   const availableTiers: MmrTier[] = [
     "Budlot",
-    "Bulotay",
+    "Budlotay",
     "Maaramay",
     "Maaram",
     "Makaritay",
@@ -133,7 +134,7 @@ export default function PlayersPage() {
   const cancelEditing = () => {
     setEditingPlayer(null);
     setNewPlayerName("");
-    setNewPlayerMmrTier("Bulotay");
+    setNewPlayerMmrTier("Budlotay");
     setSelectedRoles([]);
     setIsEditing(false);
   };
@@ -171,7 +172,7 @@ export default function PlayersPage() {
 
       // Reset form
       setNewPlayerName("");
-      setNewPlayerMmrTier("Bulotay");
+      setNewPlayerMmrTier("Budlotay");
       setSelectedRoles([]);
       setEditingPlayer(null);
       setIsEditing(false);
@@ -208,6 +209,297 @@ export default function PlayersPage() {
         return "bg-cyan-100 dark:bg-cyan-900/40 text-cyan-900 dark:text-cyan-100";
       default:
         return "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100";
+    }
+  };
+
+  // Function to get tier icons
+  const getTierIcon = (tier: MmrTier): ReactElement => {
+    switch (tier) {
+      case "Budlot":
+        return (
+          <svg
+            className="w-4 h-4 inline-block mr-1"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+            />
+          </svg>
+        );
+      case "Budlotay":
+        return (
+          <svg
+            className="w-4 h-4 inline-block mr-1"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2v20"
+            />
+          </svg>
+        );
+      case "Maaramay":
+        return (
+          <svg
+            className="w-4 h-4 inline-block mr-1"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2v20"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M2 12h20"
+            />
+          </svg>
+        );
+      case "Maaram":
+        return (
+          <svg
+            className="w-4 h-4 inline-block mr-1"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2v20"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M2 12h20"
+            />
+            <circle cx="12" cy="12" r="2" strokeWidth={2} />
+          </svg>
+        );
+      case "Makaritay":
+        return (
+          <svg
+            className="w-4 h-4 inline-block mr-1"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2v20"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M2 12h20"
+            />
+            <circle cx="12" cy="12" r="2" strokeWidth={2} />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2l4 4-4 4-4-4 4-4z"
+            />
+          </svg>
+        );
+      case "Makarit":
+        return (
+          <svg
+            className="w-4 h-4 inline-block mr-1"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2v20"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M2 12h20"
+            />
+            <circle cx="12" cy="12" r="2" strokeWidth={2} />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2l4 4-4 4-4-4 4-4z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 18l4-4-4-4-4 4 4 4z"
+            />
+          </svg>
+        );
+      case "MakaritKaritan":
+        return (
+          <svg
+            className="w-4 h-4 inline-block mr-1"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2v20"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M2 12h20"
+            />
+            <circle cx="12" cy="12" r="2" strokeWidth={2} />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2l4 4-4 4-4-4 4-4z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 18l4-4-4-4-4 4 4 4z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M2 12l4-4 4 4-4 4-4-4z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M18 12l4-4 4 4-4 4-4-4z"
+            />
+          </svg>
+        );
+      case "Gikakariti":
+        return (
+          <svg
+            className="w-4 h-4 inline-block mr-1"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2v20"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M2 12h20"
+            />
+            <circle cx="12" cy="12" r="2" strokeWidth={2} />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2l4 4-4 4-4-4 4-4z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 18l4-4-4-4-4 4 4 4z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M2 12l4-4 4 4-4 4-4-4z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M18 12l4-4 4 4-4 4-4-4z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 2l8 8-8 8-8-8 8-8z"
+            />
+          </svg>
+        );
+      default:
+        return <></>;
     }
   };
 
@@ -256,18 +548,56 @@ export default function PlayersPage() {
             >
               MMR Tier
             </label>
-            <select
-              id="player-mmr-tier"
-              value={newPlayerMmrTier}
-              onChange={(e) => setNewPlayerMmrTier(e.target.value as MmrTier)}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
-            >
-              {availableTiers.map((tier) => (
-                <option key={tier} value={tier}>
-                  {tier} ({DEFAULT_MMR_VALUES[tier]} MMR)
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsTierDropdownOpen(!isTierDropdownOpen)}
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white flex items-center justify-between"
+              >
+                <div className="flex items-center">
+                  {getTierIcon(newPlayerMmrTier)}
+                  <span>
+                    {newPlayerMmrTier} ({DEFAULT_MMR_VALUES[newPlayerMmrTier]}{" "}
+                    MMR)
+                  </span>
+                </div>
+                <svg
+                  className={`w-5 h-5 transition-transform ${
+                    isTierDropdownOpen ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+
+              {isTierDropdownOpen && (
+                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg">
+                  {availableTiers.map((tier) => (
+                    <button
+                      key={tier}
+                      onClick={() => {
+                        setNewPlayerMmrTier(tier);
+                        setIsTierDropdownOpen(false);
+                      }}
+                      className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center"
+                    >
+                      {getTierIcon(tier)}
+                      <span className="ml-2">
+                        {tier} ({DEFAULT_MMR_VALUES[tier]} MMR)
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div>
@@ -380,9 +710,11 @@ export default function PlayersPage() {
                             player.mmr
                           )}`}
                         >
+                          {getTierIcon(getMmrTierName(player.mmr) as MmrTier)}
                           {player.mmr}
                         </span>
                         <span className="text-xs ml-1 text-gray-500">
+                          {getTierIcon(getMmrTierName(player.mmr) as MmrTier)}
                           {getMmrTierName(player.mmr)}
                         </span>
                       </div>

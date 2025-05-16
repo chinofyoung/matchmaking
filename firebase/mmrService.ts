@@ -8,7 +8,7 @@ const K_FACTOR = 32; // How much MMR can change in a single match
 // Default MMR values for each tier
 export type MmrTier =
   | "Budlot"
-  | "Bulotay"
+  | "Budlotay"
   | "Maaramay"
   | "Maaram"
   | "Makaritay"
@@ -18,7 +18,7 @@ export type MmrTier =
 
 export const DEFAULT_MMR_VALUES: Record<MmrTier, number> = {
   Budlot: 900,
-  Bulotay: 1000,
+  Budlotay: 1000,
   Maaramay: 1200,
   Maaram: 1400,
   Makaritay: 1600,
@@ -28,12 +28,12 @@ export const DEFAULT_MMR_VALUES: Record<MmrTier, number> = {
 };
 
 // Get default MMR value for a new player
-export const getMmrDefaultValue = (tier: MmrTier = "Bulotay"): number => {
+export const getMmrDefaultValue = (tier: MmrTier = "Budlotay"): number => {
   return DEFAULT_MMR_VALUES[tier];
 };
 
 // Initialize MMR for a new player based on their selected tier
-export const getInitialMmr = (tier: MmrTier = "Bulotay"): number => {
+export const getInitialMmr = (tier: MmrTier = "Budlotay"): number => {
   return getMmrDefaultValue(tier);
 };
 
@@ -182,7 +182,7 @@ export const getMmrTierName = (mmr: number): string => {
   if (mmr >= 1600) return "Makaritay";
   if (mmr >= 1400) return "Maaram";
   if (mmr >= 1200) return "Maaramay";
-  if (mmr >= 1000) return "Bulotay";
+  if (mmr >= 1000) return "Budlotay";
   return "Budlot";
 };
 
