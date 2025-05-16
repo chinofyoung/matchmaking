@@ -54,6 +54,12 @@ export default function RootLayout({
                     Teams
                   </Link>
                   <Link
+                    href="/custom-team"
+                    className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-600"
+                  >
+                    Custom Team
+                  </Link>
+                  <Link
                     href="/matches"
                     className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-600"
                   >
