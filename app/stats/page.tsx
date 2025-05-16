@@ -10,297 +10,7 @@ import {
   MmrTier,
   DEFAULT_MMR_VALUES,
 } from "@/firebase/mmrService";
-
-// Function to get tier icons
-const getTierIcon = (tier: MmrTier): React.ReactElement => {
-  switch (tier) {
-    case "Budlot":
-      return (
-        <svg
-          className="w-4 h-4 inline-block mr-1"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-          />
-        </svg>
-      );
-    case "Budlotay":
-      return (
-        <svg
-          className="w-4 h-4 inline-block mr-1"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2v20"
-          />
-        </svg>
-      );
-    case "Maaramay":
-      return (
-        <svg
-          className="w-4 h-4 inline-block mr-1"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2v20"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2 12h20"
-          />
-        </svg>
-      );
-    case "Maaram":
-      return (
-        <svg
-          className="w-4 h-4 inline-block mr-1"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2v20"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2 12h20"
-          />
-          <circle cx="12" cy="12" r="2" strokeWidth={2} />
-        </svg>
-      );
-    case "Makaritay":
-      return (
-        <svg
-          className="w-4 h-4 inline-block mr-1"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2v20"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2 12h20"
-          />
-          <circle cx="12" cy="12" r="2" strokeWidth={2} />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2l4 4-4 4-4-4 4-4z"
-          />
-        </svg>
-      );
-    case "Makarit":
-      return (
-        <svg
-          className="w-4 h-4 inline-block mr-1"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2v20"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2 12h20"
-          />
-          <circle cx="12" cy="12" r="2" strokeWidth={2} />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2l4 4-4 4-4-4 4-4z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 18l4-4-4-4-4 4 4 4z"
-          />
-        </svg>
-      );
-    case "MakaritKaritan":
-      return (
-        <svg
-          className="w-4 h-4 inline-block mr-1"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2v20"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2 12h20"
-          />
-          <circle cx="12" cy="12" r="2" strokeWidth={2} />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2l4 4-4 4-4-4 4-4z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 18l4-4-4-4-4 4 4 4z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2 12l4-4 4 4-4 4-4-4z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M18 12l4-4 4 4-4 4-4-4z"
-          />
-        </svg>
-      );
-    case "Gikakariti":
-      return (
-        <svg
-          className="w-4 h-4 inline-block mr-1"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2v20"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2 12h20"
-          />
-          <circle cx="12" cy="12" r="2" strokeWidth={2} />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2l4 4-4 4-4-4 4-4z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 18l4-4-4-4-4 4 4 4z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2 12l4-4 4 4-4 4-4-4z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M18 12l4-4 4 4-4 4-4-4z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2l8 8-8 8-8-8 8-8z"
-          />
-        </svg>
-      );
-    default:
-      return <></>;
-  }
-};
+import { TierIcon } from "@/app/components/TierIcon";
 
 export default function StatsPage() {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -310,6 +20,7 @@ export default function StatsPage() {
   const [filterMmrTier, setFilterMmrTier] = useState<string>("all");
   const [filterRole, setFilterRole] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("winRate");
+  const [isTierDropdownOpen, setIsTierDropdownOpen] = useState(false);
 
   useEffect(() => {
     const loadPlayers = async () => {
@@ -445,26 +156,96 @@ export default function StatsPage() {
                     <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                       Filter by MMR Tier
                     </label>
-                    <select
-                      value={filterMmrTier}
-                      onChange={(e) => {
-                        setFilterMmrTier(e.target.value);
-                        applyFilters(
-                          players,
-                          e.target.value,
-                          filterRole,
-                          sortBy
-                        );
-                      }}
-                      className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    >
-                      <option value="all">All Tiers</option>
-                      {availableTiers.map((tier) => (
-                        <option key={tier} value={tier}>
-                          {getTierIcon(tier as MmrTier)} {tier}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <button
+                        onClick={() =>
+                          setIsTierDropdownOpen(!isTierDropdownOpen)
+                        }
+                        className={`w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white flex items-center justify-between ${
+                          filterMmrTier !== "all"
+                            ? getMmrTierColor(
+                                DEFAULT_MMR_VALUES[filterMmrTier as MmrTier]
+                              )
+                            : ""
+                        }`}
+                      >
+                        <span>
+                          {filterMmrTier === "all" ? (
+                            "All Tiers"
+                          ) : (
+                            <>
+                              <TierIcon tier={filterMmrTier as MmrTier} />
+                              {filterMmrTier}
+                            </>
+                          )}
+                        </span>
+                        <svg
+                          className={`w-4 h-4 transition-transform ${
+                            isTierDropdownOpen ? "rotate-180" : ""
+                          }`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </button>
+
+                      {isTierDropdownOpen && (
+                        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg">
+                          <div
+                            className="py-1"
+                            role="menu"
+                            aria-orientation="vertical"
+                            aria-labelledby="tier-menu"
+                          >
+                            <button
+                              onClick={() => {
+                                setFilterMmrTier("all");
+                                setIsTierDropdownOpen(false);
+                                applyFilters(
+                                  players,
+                                  "all",
+                                  filterRole,
+                                  sortBy
+                                );
+                              }}
+                              className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
+                              role="menuitem"
+                            >
+                              All Tiers
+                            </button>
+                            {availableTiers.map((tier) => (
+                              <button
+                                key={tier}
+                                onClick={() => {
+                                  setFilterMmrTier(tier);
+                                  setIsTierDropdownOpen(false);
+                                  applyFilters(
+                                    players,
+                                    tier,
+                                    filterRole,
+                                    sortBy
+                                  );
+                                }}
+                                className={`w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center ${getMmrTierColor(
+                                  DEFAULT_MMR_VALUES[tier]
+                                )}`}
+                                role="menuitem"
+                              >
+                                <TierIcon tier={tier} />
+                                <span className="ml-2">{tier}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Role filter */}
@@ -632,10 +413,10 @@ export default function StatsPage() {
                                   playerMmr
                                 )}`}
                               >
-                                {getTierIcon(
-                                  getMmrTierName(playerMmr) as MmrTier
-                                )}
-                                {getMmrTierName(playerMmr)}
+                                <TierIcon
+                                  tier={getMmrTierName(playerMmr) as MmrTier}
+                                />
+                                {playerMmr} MMR - {getMmrTierName(playerMmr)}
                               </span>
                             </td>
                             <td className="py-3 px-4">

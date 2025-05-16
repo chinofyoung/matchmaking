@@ -12,301 +12,22 @@ import {
   MmrTier,
 } from "@/firebase/mmrService";
 import Link from "next/link";
+import { TierIcon } from "@/app/components/TierIcon";
 
 type PageParams = {
   id: string;
 };
 
-// Function to get tier icons
-const getTierIcon = (tier: MmrTier): ReactElement => {
-  switch (tier) {
-    case "Budlot":
-      return (
-        <svg
-          className="w-4 h-4 inline-block mr-1"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-          />
-        </svg>
-      );
-    case "Budlotay":
-      return (
-        <svg
-          className="w-4 h-4 inline-block mr-1"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2v20"
-          />
-        </svg>
-      );
-    case "Maaramay":
-      return (
-        <svg
-          className="w-4 h-4 inline-block mr-1"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2v20"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2 12h20"
-          />
-        </svg>
-      );
-    case "Maaram":
-      return (
-        <svg
-          className="w-4 h-4 inline-block mr-1"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2v20"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2 12h20"
-          />
-          <circle cx="12" cy="12" r="2" strokeWidth={2} />
-        </svg>
-      );
-    case "Makaritay":
-      return (
-        <svg
-          className="w-4 h-4 inline-block mr-1"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2v20"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2 12h20"
-          />
-          <circle cx="12" cy="12" r="2" strokeWidth={2} />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2l4 4-4 4-4-4 4-4z"
-          />
-        </svg>
-      );
-    case "Makarit":
-      return (
-        <svg
-          className="w-4 h-4 inline-block mr-1"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2v20"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2 12h20"
-          />
-          <circle cx="12" cy="12" r="2" strokeWidth={2} />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2l4 4-4 4-4-4 4-4z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 18l4-4-4-4-4 4 4 4z"
-          />
-        </svg>
-      );
-    case "MakaritKaritan":
-      return (
-        <svg
-          className="w-4 h-4 inline-block mr-1"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2v20"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2 12h20"
-          />
-          <circle cx="12" cy="12" r="2" strokeWidth={2} />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2l4 4-4 4-4-4 4-4z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 18l4-4-4-4-4 4 4 4z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2 12l4-4 4 4-4 4-4-4z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M18 12l4-4 4 4-4 4-4-4z"
-          />
-        </svg>
-      );
-    case "Gikakariti":
-      return (
-        <svg
-          className="w-4 h-4 inline-block mr-1"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2v20"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2 12h20"
-          />
-          <circle cx="12" cy="12" r="2" strokeWidth={2} />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2l4 4-4 4-4-4 4-4z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 18l4-4-4-4-4 4 4 4z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2 12l4-4 4 4-4 4-4-4z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M18 12l4-4 4 4-4 4-4-4z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2l8 8-8 8-8-8 8-8z"
-          />
-        </svg>
-      );
-    default:
-      return <></>;
-  }
-};
+const availableTiers: MmrTier[] = [
+  "Budlot",
+  "Budlotay",
+  "Maaramay",
+  "Maaram",
+  "Makaritay",
+  "Makarit",
+  "MakaritKaritan",
+  "Gikakariti",
+];
 
 export default function MatchDetailPage({ params }: { params: PageParams }) {
   const router = useRouter();
@@ -319,6 +40,10 @@ export default function MatchDetailPage({ params }: { params: PageParams }) {
   const [teamComposition, setTeamComposition] =
     useState<TeamComposition | null>(null);
   const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
+
+  // Add state for dropdown
+  const [isTierDropdownOpen, setIsTierDropdownOpen] = useState(false);
+  const [selectedTier, setSelectedTier] = useState<MmrTier | null>(null);
 
   useEffect(() => {
     const loadMatchDetails = async () => {
@@ -512,9 +237,10 @@ export default function MatchDetailPage({ params }: { params: PageParams }) {
                         <span
                           key={tier}
                           className={`text-xs px-2 py-1 rounded-full ${getMmrTierColor(
-                            parseInt(tier) || 1200
+                            DEFAULT_MMR_VALUES[tier as MmrTier]
                           )}`}
                         >
+                          <TierIcon tier={tier as MmrTier} />
                           {count} {tier}
                         </span>
                       )
@@ -542,10 +268,10 @@ export default function MatchDetailPage({ params }: { params: PageParams }) {
                                   playerMmr
                                 )}`}
                               >
-                                {getTierIcon(
-                                  getMmrTierName(playerMmr) as MmrTier
-                                )}
-                                {getMmrTierName(playerMmr)}
+                                <TierIcon
+                                  tier={getMmrTierName(playerMmr) as MmrTier}
+                                />
+                                {playerMmr} MMR - {getMmrTierName(playerMmr)}
                               </span>
                             </div>
                           </div>
@@ -589,9 +315,10 @@ export default function MatchDetailPage({ params }: { params: PageParams }) {
                         <span
                           key={tier}
                           className={`text-xs px-2 py-1 rounded-full ${getMmrTierColor(
-                            parseInt(tier) || 1200
+                            DEFAULT_MMR_VALUES[tier as MmrTier]
                           )}`}
                         >
+                          <TierIcon tier={tier as MmrTier} />
                           {count} {tier}
                         </span>
                       )
@@ -619,10 +346,10 @@ export default function MatchDetailPage({ params }: { params: PageParams }) {
                                   playerMmr
                                 )}`}
                               >
-                                {getTierIcon(
-                                  getMmrTierName(playerMmr) as MmrTier
-                                )}
-                                {getMmrTierName(playerMmr)}
+                                <TierIcon
+                                  tier={getMmrTierName(playerMmr) as MmrTier}
+                                />
+                                {playerMmr} MMR - {getMmrTierName(playerMmr)}
                               </span>
                             </div>
                           </div>
@@ -648,6 +375,79 @@ export default function MatchDetailPage({ params }: { params: PageParams }) {
           )}
         </>
       )}
+
+      <div className="relative">
+        <button
+          onClick={() => setIsTierDropdownOpen(!isTierDropdownOpen)}
+          className={`w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white flex items-center justify-between ${
+            selectedTier
+              ? getMmrTierColor(DEFAULT_MMR_VALUES[selectedTier])
+              : ""
+          }`}
+        >
+          <span>
+            {selectedTier ? (
+              <>
+                <TierIcon tier={selectedTier} />
+                {selectedTier}
+              </>
+            ) : (
+              "Select Tier"
+            )}
+          </span>
+          <svg
+            className={`w-4 h-4 transition-transform ${
+              isTierDropdownOpen ? "rotate-180" : ""
+            }`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </button>
+
+        {isTierDropdownOpen && (
+          <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg">
+            <div
+              className="py-1"
+              role="menu"
+              aria-orientation="vertical"
+              aria-labelledby="tier-menu"
+            >
+              <button
+                onClick={() => {
+                  setSelectedTier(null);
+                  setIsTierDropdownOpen(false);
+                }}
+                className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
+                role="menuitem"
+              >
+                All Tiers
+              </button>
+              {availableTiers.map((tier) => (
+                <button
+                  key={tier}
+                  onClick={() => {
+                    setSelectedTier(tier);
+                    setIsTierDropdownOpen(false);
+                  }}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-900 dark:text-white flex items-center"
+                  role="menuitem"
+                >
+                  <TierIcon tier={tier} />
+                  <span className="ml-2">{tier}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

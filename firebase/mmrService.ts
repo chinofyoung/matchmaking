@@ -187,13 +187,26 @@ export const getMmrTierName = (mmr: number): string => {
 };
 
 // Get color class for MMR tier
-export const getMmrTierColor = (mmr: number): string => {
-  if (mmr >= 2200) return "text-purple-800 dark:text-purple-300 font-semibold";
-  if (mmr >= 2000) return "text-pink-800 dark:text-pink-300 font-semibold";
-  if (mmr >= 1800) return "text-yellow-800 dark:text-yellow-300 font-semibold";
-  if (mmr >= 1600) return "text-orange-800 dark:text-orange-300 font-semibold";
-  if (mmr >= 1400) return "text-teal-800 dark:text-teal-300 font-semibold";
-  if (mmr >= 1200) return "text-blue-800 dark:text-blue-300 font-semibold";
-  if (mmr >= 1000) return "text-green-800 dark:text-green-300 font-semibold";
-  return "text-gray-800 dark:text-gray-300 font-semibold";
-};
+export function getMmrTierColor(mmr: number): string {
+  const tier = getMmrTierName(mmr);
+  switch (tier) {
+    case "Budlot":
+      return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-700";
+    case "Budlotay":
+      return "bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-700";
+    case "Maaramay":
+      return "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 border border-green-300 dark:border-green-700";
+    case "Maaram":
+      return "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200 border border-purple-300 dark:border-purple-700";
+    case "Makaritay":
+      return "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-700";
+    case "Makarit":
+      return "bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-200 border border-orange-300 dark:border-orange-700";
+    case "MakaritKaritan":
+      return "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 border border-red-300 dark:border-red-700";
+    case "Gikakariti":
+      return "bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 text-purple-800 dark:text-purple-200 border border-purple-300 dark:border-purple-700";
+    default:
+      return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-700";
+  }
+}
