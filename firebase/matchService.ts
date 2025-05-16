@@ -11,10 +11,13 @@ import {
   limit,
   where,
   runTransaction,
+  deleteDoc,
+  Timestamp,
 } from "firebase/firestore";
 import { db } from "./config";
 import { MatchResult, PlayerStats, Player, TeamComposition } from "@/app/types";
 import { calculateMatchMmrChanges } from "./mmrService";
+import { playerToGlicko2 } from "./glicko2Service";
 
 // Reference to collections
 const matchResultsCollection = collection(db, "matchResults");
@@ -217,13 +220,42 @@ export const getTopPlayersByWinRate = async (
       (doc) => ({ id: doc.id, ...doc.data() } as Player)
     );
 
-    // Sort by win rate
+    // Filter players with match history and sort using the same ranking system as stats page
     const sortedPlayers = players
       .filter((player) => player.stats && player.stats.matchesPlayed > 0)
       .sort((a, b) => {
-        const aWinRate = a.stats?.winRate || 0;
-        const bWinRate = b.stats?.winRate || 0;
-        return bWinRate - aWinRate;
+        // First, sort by reliability status
+        const aGlicko2 = playerToGlicko2(a);
+        const bGlicko2 = playerToGlicko2(b);
+        const aRd = aGlicko2.rd * 173.7178;
+        const bRd = bGlicko2.rd * 173.7178;
+
+        // If one player is calibrating and the other isn't, prioritize the non-calibrating player
+        if (aRd > 100 && bRd <= 100) return 1; // a is calibrating, b is not
+        if (aRd <= 100 && bRd > 100) return -1;
+
+        // If both are in the same reliability category, use the weighted score
+        const getWeightedScore = (player: Player) => {
+          const matchesPlayed = player.stats?.matchesPlayed || 0;
+          const mmr = player.stats?.mmr || player.mmr;
+          const winRate = player.stats?.winRate || 0;
+
+          // For reliable players (7+ matches), prioritize win rate
+          if (matchesPlayed >= 7) {
+            // Win rate is the primary factor (multiplied by 100 to make it more significant)
+            let score = winRate * 100;
+            // Add MMR as a secondary factor (divided by 10 to make it less significant)
+            score += mmr / 10;
+            return score;
+          }
+
+          // For calibrating players, use MMR as primary factor
+          return mmr;
+        };
+
+        const aScore = getWeightedScore(a);
+        const bScore = getWeightedScore(b);
+        return bScore - aScore;
       });
 
     return sortedPlayers.slice(0, topCount);

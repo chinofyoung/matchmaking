@@ -9,6 +9,7 @@ import {
   getTopPlayersByWinRate,
 } from "../firebase/matchService";
 import { Player, TeamComposition, MatchResult } from "./types";
+import { playerToGlicko2 } from "../firebase/glicko2Service";
 
 export default function HomePage() {
   const [playerCount, setPlayerCount] = useState<number>(0);
@@ -197,44 +198,72 @@ export default function HomePage() {
                       <tr className="border-b dark:border-gray-700">
                         <th className="text-left py-2 px-4">Rank</th>
                         <th className="text-left py-2 px-4">Player</th>
+                        <th className="text-center py-2 px-4">Status</th>
                         <th className="text-center py-2 px-4">W/L</th>
                         <th className="text-center py-2 px-4">Win Rate</th>
+                        <th className="text-center py-2 px-4">MMR</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {topPlayers.map((player, index) => (
-                        <tr
-                          key={player.id}
-                          className={`border-b dark:border-gray-700 ${
-                            index === 0
-                              ? "bg-yellow-50 dark:bg-yellow-900/10"
-                              : ""
-                          }`}
-                        >
-                          <td className="py-2 px-4">
-                            {index === 0 ? (
-                              <span className="text-yellow-500 mr-1">🏆</span>
-                            ) : (
-                              index + 1
-                            )}
-                          </td>
-                          <td className="py-2 px-4 font-medium">
-                            {player.name}
-                          </td>
-                          <td className="py-2 px-4 text-center">
-                            <span className="text-green-600 dark:text-green-400 font-medium">
-                              {player.stats?.wins || 0}
-                            </span>
-                            {" / "}
-                            <span className="text-red-600 dark:text-red-400 font-medium">
-                              {player.stats?.losses || 0}
-                            </span>
-                          </td>
-                          <td className="py-2 px-4 text-center font-bold">
-                            {player.stats?.winRate?.toFixed(1) || "0.0"}%
-                          </td>
-                        </tr>
-                      ))}
+                      {topPlayers.map((player, index) => {
+                        const matchesPlayed = player.stats?.matchesPlayed || 0;
+                        const reliabilityStatus =
+                          matchesPlayed >= 7
+                            ? "Reliable"
+                            : matchesPlayed >= 4
+                            ? "Moderate"
+                            : "Calibrating";
+                        const reliabilityColor =
+                          matchesPlayed >= 7
+                            ? "text-green-600"
+                            : matchesPlayed >= 4
+                            ? "text-yellow-600"
+                            : "text-blue-600";
+
+                        return (
+                          <tr
+                            key={player.id}
+                            className={`border-b dark:border-gray-700 ${
+                              index === 0
+                                ? "bg-yellow-50 dark:bg-yellow-900/10"
+                                : ""
+                            }`}
+                          >
+                            <td className="py-2 px-4">
+                              {index === 0 ? (
+                                <span className="text-yellow-500 mr-1">🏆</span>
+                              ) : (
+                                index + 1
+                              )}
+                            </td>
+                            <td className="py-2 px-4 font-medium">
+                              {player.name}
+                            </td>
+                            <td className="py-2 px-4 text-center">
+                              <span
+                                className={`${reliabilityColor} font-medium`}
+                              >
+                                {reliabilityStatus}
+                              </span>
+                            </td>
+                            <td className="py-2 px-4 text-center">
+                              <span className="text-green-600 dark:text-green-400 font-medium">
+                                {player.stats?.wins || 0}
+                              </span>
+                              {" / "}
+                              <span className="text-red-600 dark:text-red-400 font-medium">
+                                {player.stats?.losses || 0}
+                              </span>
+                            </td>
+                            <td className="py-2 px-4 text-center font-bold">
+                              {((player.stats?.winRate || 0) * 100).toFixed(1)}%
+                            </td>
+                            <td className="py-2 px-4 text-center">
+                              {player.stats?.mmr || player.mmr}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
