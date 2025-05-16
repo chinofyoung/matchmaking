@@ -24,7 +24,7 @@ export default function StatsPage() {
   const [error, setError] = useState<string | null>(null);
   const [filterMmrTier, setFilterMmrTier] = useState<string>("all");
   const [filterRole, setFilterRole] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<string>("winRate");
+  const [sortBy, setSortBy] = useState<string>("default");
   const [isTierDropdownOpen, setIsTierDropdownOpen] = useState(false);
 
   useEffect(() => {
@@ -86,28 +86,43 @@ export default function StatsPage() {
       if (aRd > 100 && bRd <= 100) return 1; // a is calibrating, b is not
       if (aRd <= 100 && bRd > 100) return -1; // b is calibrating, a is not
 
-      // If both are in the same reliability category, calculate weighted score
-      const getWeightedScore = (player: Player) => {
-        const matchesPlayed = player.stats?.matchesPlayed || 0;
-        const mmr = player.stats?.mmr || player.mmr;
-        const winRate = player.stats?.winRate || 0;
+      // If both are in the same reliability category, sort by the selected field
+      if (sortField === "default") {
+        const getWeightedScore = (player: Player) => {
+          const matchesPlayed = player.stats?.matchesPlayed || 0;
+          const mmr = player.stats?.mmr || player.mmr;
+          const winRate = player.stats?.winRate || 0;
 
-        // For reliable players (7+ matches), prioritize win rate
-        if (matchesPlayed >= 7) {
-          // Win rate is the primary factor (multiplied by 100 to make it more significant)
-          let score = winRate * 100;
-          // Add MMR as a secondary factor (divided by 10 to make it less significant)
-          score += mmr / 10;
-          return score;
-        }
+          // For reliable players (7+ matches), prioritize win rate
+          if (matchesPlayed >= 7) {
+            // Win rate is the primary factor (multiplied by 100 to make it more significant)
+            let score = winRate * 100;
+            // Add MMR as a secondary factor (divided by 10 to make it less significant)
+            score += mmr / 10;
+            return score;
+          }
 
-        // For calibrating players, use MMR as primary factor
-        return mmr;
-      };
+          // For calibrating players, use MMR as primary factor
+          return mmr;
+        };
 
-      const aScore = getWeightedScore(a);
-      const bScore = getWeightedScore(b);
-      return bScore - aScore;
+        const aScore = getWeightedScore(a);
+        const bScore = getWeightedScore(b);
+        return bScore - aScore;
+      } else if (sortField === "winRate") {
+        return (b.stats?.winRate || 0) - (a.stats?.winRate || 0);
+      } else if (sortField === "wins") {
+        return (b.stats?.wins || 0) - (a.stats?.wins || 0);
+      } else if (sortField === "matchesPlayed") {
+        return (b.stats?.matchesPlayed || 0) - (a.stats?.matchesPlayed || 0);
+      } else if (sortField === "mmr") {
+        const bMmr = b.stats?.mmr || b.mmr;
+        const aMmr = a.stats?.mmr || a.mmr;
+        return bMmr - aMmr;
+      } else {
+        // Default to win rate if no valid sort field
+        return (b.stats?.winRate || 0) - (a.stats?.winRate || 0);
+      }
     });
 
     setFilteredPlayers(result);
@@ -317,6 +332,7 @@ export default function StatsPage() {
                       }}
                       className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     >
+                      <option value="default">Default (Ranking)</option>
                       <option value="winRate">Win Rate</option>
                       <option value="matchesPlayed">Matches Played</option>
                       <option value="wins">Total Wins</option>
