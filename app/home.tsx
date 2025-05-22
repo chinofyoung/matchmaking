@@ -3,17 +3,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getPlayersFromFirestore } from "../firebase/playerService";
-import { getRecentTeamCompositions } from "../firebase/playerService";
 import {
   getRecentMatchResults,
   getTopPlayersByWinRate,
 } from "../firebase/matchService";
-import { Player, TeamComposition, MatchResult } from "./types";
-import { playerToGlicko2 } from "../firebase/glicko2Service";
+import { Player, MatchResult } from "./types";
 
 export default function HomePage() {
   const [playerCount, setPlayerCount] = useState<number>(0);
-  const [matchCount, setMatchCount] = useState<number>(0);
   const [recentMatches, setRecentMatches] = useState<MatchResult[]>([]);
   const [topPlayers, setTopPlayers] = useState<Player[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -32,7 +29,6 @@ export default function HomePage() {
         // Load recent matches
         const matches = await getRecentMatchResults(5);
         setRecentMatches(matches);
-        setMatchCount(matches.length);
 
         // Load top players
         const topPlayersList = await getTopPlayersByWinRate(5);

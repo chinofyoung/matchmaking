@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, ReactElement } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
 import { getTeamCompositionById } from "@/firebase/playerService";
 import { getMatchResultForTeamComposition } from "@/firebase/matchService";
 import { TeamComposition, MatchResult, Role } from "@/app/types";
@@ -18,21 +17,22 @@ type PageParams = {
   id: string;
 };
 
-const availableTiers: MmrTier[] = [
-  "Budlot",
-  "Budlotay",
-  "Maaramay",
-  "Maaram",
-  "Makaritay",
-  "Makarit",
-  "MakaritKaritan",
-  "Gikakariti",
-];
+type Player = {
+  name: string;
+  roles: Role[];
+  stats?: {
+    mmr: number;
+  };
+  mmr: number;
+};
 
-export default function MatchDetailPage({ params }: { params: PageParams }) {
-  const router = useRouter();
-  // Unwrap params with React.use() as recommended by Next.js
-  const unwrappedParams = React.use(params as unknown as Promise<PageParams>);
+export default function MatchDetailPage({
+  params,
+}: {
+  params: Promise<PageParams>;
+}) {
+  // Unwrap params with React.use()
+  const unwrappedParams = React.use(params);
   const matchId = unwrappedParams.id;
 
   const [isLoading, setIsLoading] = useState(true);
@@ -40,10 +40,6 @@ export default function MatchDetailPage({ params }: { params: PageParams }) {
   const [teamComposition, setTeamComposition] =
     useState<TeamComposition | null>(null);
   const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
-
-  // Add state for dropdown
-  const [isTierDropdownOpen, setIsTierDropdownOpen] = useState(false);
-  const [selectedTier, setSelectedTier] = useState<MmrTier | null>(null);
 
   useEffect(() => {
     const loadMatchDetails = async () => {
@@ -100,18 +96,8 @@ export default function MatchDetailPage({ params }: { params: PageParams }) {
     }
   };
 
-  // Helper function to get average MMR for a team
-  const getTeamAverageMmr = (players: any[]) => {
-    if (!players || players.length === 0) return 0;
-    const totalMmr = players.reduce((sum, player) => {
-      const playerMmr = player.stats?.mmr || player.mmr;
-      return sum + playerMmr;
-    }, 0);
-    return Math.round(totalMmr / players.length);
-  };
-
   // Helper function to group players by tier
-  const getPlayersByTier = (players: any[]) => {
+  const getPlayersByTier = (players: Player[]) => {
     const tiers: Record<string, number> = {};
     players.forEach((player) => {
       const playerMmr = player.stats?.mmr || player.mmr;
@@ -375,79 +361,6 @@ export default function MatchDetailPage({ params }: { params: PageParams }) {
           )}
         </>
       )}
-
-      <div className="relative">
-        <button
-          onClick={() => setIsTierDropdownOpen(!isTierDropdownOpen)}
-          className={`w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white flex items-center justify-between ${
-            selectedTier
-              ? getMmrTierColor(DEFAULT_MMR_VALUES[selectedTier])
-              : ""
-          }`}
-        >
-          <span>
-            {selectedTier ? (
-              <>
-                <TierIcon tier={selectedTier} />
-                {selectedTier}
-              </>
-            ) : (
-              "Select Tier"
-            )}
-          </span>
-          <svg
-            className={`w-4 h-4 transition-transform ${
-              isTierDropdownOpen ? "rotate-180" : ""
-            }`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        </button>
-
-        {isTierDropdownOpen && (
-          <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg">
-            <div
-              className="py-1"
-              role="menu"
-              aria-orientation="vertical"
-              aria-labelledby="tier-menu"
-            >
-              <button
-                onClick={() => {
-                  setSelectedTier(null);
-                  setIsTierDropdownOpen(false);
-                }}
-                className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
-                role="menuitem"
-              >
-                All Tiers
-              </button>
-              {availableTiers.map((tier) => (
-                <button
-                  key={tier}
-                  onClick={() => {
-                    setSelectedTier(tier);
-                    setIsTierDropdownOpen(false);
-                  }}
-                  className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-900 dark:text-white flex items-center"
-                  role="menuitem"
-                >
-                  <TierIcon tier={tier} />
-                  <span className="ml-2">{tier}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

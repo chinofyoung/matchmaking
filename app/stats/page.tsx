@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { getPlayersFromFirestore } from "@/firebase/playerService";
-import { getTopPlayersByWinRate } from "@/firebase/matchService";
 import { Player, Role } from "@/app/types";
 import {
   getMmrTierName,
@@ -11,11 +10,7 @@ import {
   DEFAULT_MMR_VALUES,
 } from "@/firebase/mmrService";
 import { TierIcon } from "@/app/components/TierIcon";
-import {
-  playerToGlicko2,
-  calculateRatingReliability,
-  getMatchesForReliableRating,
-} from "@/firebase/glicko2Service";
+import { playerToGlicko2 } from "@/firebase/glicko2Service";
 
 export default function StatsPage() {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -51,7 +46,7 @@ export default function StatsPage() {
     };
 
     loadPlayers();
-  }, []);
+  }, [filterMmrTier, filterRole, sortBy]);
 
   const applyFilters = (
     playersToFilter: Player[],
@@ -71,7 +66,7 @@ export default function StatsPage() {
 
     // Apply role filter
     if (role !== "all") {
-      result = result.filter((player) => player.roles.includes(role as any));
+      result = result.filter((player) => player.roles.includes(role as Role));
     }
 
     // Apply sorting
@@ -407,12 +402,6 @@ export default function StatsPage() {
                       {filteredPlayers.map((player, index) => {
                         const playerMmr = player.stats?.mmr || player.mmr;
                         const glicko2Rating = playerToGlicko2(player);
-                        const reliability = calculateRatingReliability(
-                          glicko2Rating.rd
-                        );
-                        const matchesNeeded = getMatchesForReliableRating(
-                          glicko2Rating.rd
-                        );
                         const rd = glicko2Rating.rd * 173.7178; // Convert back to Glicko-1 RD for display
 
                         // Calculate confidence-adjusted rank

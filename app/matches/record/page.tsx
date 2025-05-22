@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { recordMatchResult } from "@/firebase/matchService";
 import { getRecentTeamCompositions } from "@/firebase/playerService";
 import { TeamComposition, Player } from "@/app/types";
 import { getMmrTierColor } from "@/firebase/mmrService";
 
-export default function RecordMatchPage() {
+// This client component safely uses useSearchParams inside Suspense
+function MatchRecordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const teamId = searchParams.get("teamId");
@@ -321,5 +322,20 @@ export default function RecordMatchPage() {
         </div>
       )}
     </div>
+  );
+}
+
+// The main page component that wraps the form with Suspense
+export default function RecordMatchPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+        </div>
+      }
+    >
+      <MatchRecordForm />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, ReactElement } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   getPlayersFromFirestore,
@@ -9,12 +9,11 @@ import {
 } from "@/firebase/playerService";
 import {
   calculateTeamAverageMmr,
-  getInitialMmr,
   getMmrTierName,
   getMmrTierColor,
   MmrTier,
 } from "@/firebase/mmrService";
-import { Player, Role, TeamComposition } from "@/app/types";
+import { Player, Role } from "@/app/types";
 import { TierIcon } from "@/app/components/TierIcon";
 
 export default function TeamsPage() {
@@ -29,23 +28,9 @@ export default function TeamsPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedCount, setSelectedCount] = useState(0);
   const [isSavingTeam, setIsSavingTeam] = useState(false);
-  const [isTierDropdownOpen, setIsTierDropdownOpen] = useState(false);
-  const [selectedTier, setSelectedTier] = useState<MmrTier | null>(null);
 
   // Available roles
   const availableRoles: Role[] = ["Roam", "Mid", "Gold", "Jungle", "Exp"];
-
-  // Available MMR tiers
-  const availableTiers: MmrTier[] = [
-    "Budlot",
-    "Budlotay",
-    "Maaramay",
-    "Maaram",
-    "Makaritay",
-    "Makarit",
-    "MakaritKaritan",
-    "Gikakariti",
-  ];
 
   // Load players from Firestore on component mount
   useEffect(() => {
